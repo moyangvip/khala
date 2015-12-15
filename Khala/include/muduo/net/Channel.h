@@ -76,6 +76,7 @@ class Channel : boost::noncopyable
   void disableWriting() { events_ &= ~kWriteEvent; update(); }
   void disableAll() { events_ = kNoneEvent; update(); }
   bool isWriting() const { return events_ & kWriteEvent; }
+  bool isReading() const { return events_ & kReadEvent; }
 
   // for Poller
   int index() { return index_; }
@@ -83,6 +84,7 @@ class Channel : boost::noncopyable
 
   // for debug
   string reventsToString() const;
+  string eventsToString() const;
 
   void doNotLogHup() { logHup_ = false; }
 
@@ -90,6 +92,8 @@ class Channel : boost::noncopyable
   void remove();
 
  private:
+  static string eventsToString(int fd, int ev);
+
   void update();
   void handleEventWithGuard(Timestamp receiveTime);
 

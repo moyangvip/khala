@@ -11,6 +11,7 @@
 #include <khala/HeadCode.h>
 #include <khala/NodeServer.h>
 #include <khala/ParseKey.h>
+#include <muduo/base/Logging.h>
 using namespace khala;
 NodeServer::NodeServer(const InetAddress& listenAddr) :
 		server_(&loop_, listenAddr, "UsrServer"), idleAliveTime_(
@@ -32,6 +33,7 @@ void NodeServer::start(int usrIoThreadNum =0) {
 				boost::bind(&NodeServer::onEveryTime, this));
 	}
 	server_.start();
+	LOG_INFO<<"Khala Server is started !enjoy~  :-)";
 	loop_.loop();
 }
 void NodeServer::onEveryTime() {

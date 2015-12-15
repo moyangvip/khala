@@ -59,7 +59,8 @@ class FixedBuffer : boost::noncopyable
   const char* debugString();
   void setCookie(void (*cookie)()) { cookie_ = cookie; }
   // for used by unit test
-  string asString() const { return string(data_, length()); }
+  string toString() const { return string(data_, length()); }
+  StringPiece toStringPiece() const { return StringPiece(data_, length()); }
 
  private:
   const char* end() const { return data_ + sizeof data_; }
@@ -149,6 +150,12 @@ class LogStream : boost::noncopyable
   self& operator<<(const StringPiece& v)
   {
     buffer_.append(v.data(), v.size());
+    return *this;
+  }
+
+  self& operator<<(const Buffer& v)
+  {
+    *this << v.toStringPiece();
     return *this;
   }
 
