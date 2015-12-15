@@ -22,7 +22,7 @@ def default():
 	return -1
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(('192.168.64.128', 2007))
+s.connect(('127.0.0.1', 2007))
 operator = {'login':login,'logout':logout,'devType':devType,'isLogin':isLogin,'nodeId':nodeId}  
 while True:
 	input = raw_input('[input cmd]:')
