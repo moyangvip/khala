@@ -13,7 +13,6 @@ namespace khala {
 #define KEY_ID "id"
 #define KEY_PASSWD "passwd"
 #define KEY_LOGIN_NAME "name"
-#define RES_ID "resid"
 
 //this is default msg type
 #define LOGIN_TYPE "login"
@@ -21,6 +20,7 @@ namespace khala {
 #define DEV_TYPE "dev"
 #define IS_LOGIN_TYPE "isLogin"
 #define NODE_ID_TYPE "nodeId"
+#define NODE_TYPE "node_type"
 
 //this is my msg type
 #define TIME_TYPE "time"
@@ -30,7 +30,6 @@ namespace khala {
 //#define SUBSCRIBED_RES_TYPE "subscribed_res"
 
 //this is node type
-#define NODE_TYPE "node_type"
 #define TEMP_NODE_TYPE "temp_type"
 #define LOGIN_NODE_TYPE "login_type"
 #define MY_NODE_TYPE "my_node_type"

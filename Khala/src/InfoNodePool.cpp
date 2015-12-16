@@ -36,3 +36,15 @@ std::vector<uint> InfoNodePool::getNodeByType(ObjectType* objectType){
 		}
 		return result;
 	}
+bool InfoNodePool::hasNode(uint id) {
+	muduo::MutexLockGuard lock(connNodeMapLock_);
+	typename NewMap::iterator it = connNodeMap_.find(id);
+	return it != connNodeMap_.end();
+}
+void InfoNodePool::remove(uint id) {
+		muduo::MutexLockGuard lock(connNodeMapLock_);
+		typename NewMap::iterator it = connNodeMap_.find(id);
+		if (it == connNodeMap_.end())
+			return;
+		connNodeMap_.erase(it);
+	}

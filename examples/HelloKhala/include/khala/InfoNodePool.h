@@ -23,21 +23,11 @@ class InfoNodePool {
 public:
 	InfoNodePool() {
 	}
-	bool hasNode(uint id) {
-		muduo::MutexLockGuard lock(connNodeMapLock_);
-		typename NewMap::iterator it = connNodeMap_.find(id);
-		return it != connNodeMap_.end();
-	}
+	bool hasNode(uint id);
 	bool find(uint id, InfoNodePtr& infoNodePtr);
 	//locked,only one threading...
 	bool setNewConnNode(uint id, InfoNodePtr& connNodePtr);
-	void remove(uint id) {
-		muduo::MutexLockGuard lock(connNodeMapLock_);
-		typename NewMap::iterator it = connNodeMap_.find(id);
-		if (it == connNodeMap_.end())
-			return;
-		connNodeMap_.erase(it);
-	}
+	void remove(uint id) ;
 	std::vector<uint> getNodeByType(ObjectType* objectType);
 private:
 	typedef boost::unordered_map<uint, InfoNodePtr> NewMap;

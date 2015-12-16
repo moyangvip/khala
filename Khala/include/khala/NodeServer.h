@@ -33,15 +33,7 @@ public:
 	 * your must set a unique nodeType to NodeType
 	 * like NodeType.getObjectType() get "node_type" as the unique nodeType key
 	 * */
-	bool addNodeType(NodeType* nodeType) {
-		if (msgController_.addObjectType(nodeType->getObjectTypeName(),
-				nodeType)) {
-			nodeType->setNodeServer(this);
-			nodeType->setRegisterMsg_();
-			return true;
-		}
-		return false;
-	}
+	bool addNodeType(NodeType* nodeType);
 	InfoNodePool* getNodePool() {
 		return &nodePool_;
 	}
@@ -51,22 +43,8 @@ public:
 	MsgController& getMsgController() {
 		return msgController_;
 	}
-	void setTempNodeTypeInstance(TempNodeType* tempNodeType) {
-		msgController_.setTempNodeType(tempNodeType);
-		tempNodeType->setNodeServer(this);
-		tempNodeType->setRegisterMsg_();
-	}
-	ObjectType* getObjectType(const std::string& type) {
-		ObjectType* objectType = 0;
-		msgController_.getObjectType(type, &objectType);
-		return objectType;
-	}
-	/*
-	 TempNodeType* getTempNodeTypeInstance() {
-	 ObjectType* objectType = 0;
-	 msgController_.getObjectType(TEMP_NODE_TYPE, &objectType);
-	 return (TempNodeType*) objectType;
-	 }*/
+	void setTempNodeTypeInstance(TempNodeType* tempNodeType) ;
+	ObjectType* getObjectType(const std::string& type) ;
 private:
 	void onConnection(const TcpConnectionPtr& conn);
 	void onMessage(const TcpConnectionPtr& conn,
