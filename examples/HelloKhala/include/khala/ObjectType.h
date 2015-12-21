@@ -21,9 +21,7 @@ typedef boost::unordered_map<std::string, RegisterMessageCallback> MsgHandlerMap
 class NodeServer;
 class RegisterHandler {
 public:
-	RegisterHandler(MsgHandlerMap& msgHandlerMap) :
-			msgHandlerMap_(msgHandlerMap) {
-	}
+	RegisterHandler(MsgHandlerMap& msgHandlerMap);
 	bool setRegisterMsg(const std::string & type,
 			const RegisterMessageCallback& cb);
 private:
@@ -32,19 +30,12 @@ private:
 
 class ObjectType {
 public:
-	ObjectType() :
-			nodeServer_(0) {
-	}
-	virtual ~ObjectType() {
-	}
-	static ObjectType* getInstance() {
-		return (ObjectType *) 0;
-	}
+	ObjectType();
+	virtual ~ObjectType();
+	static ObjectType* getInstance();
 	virtual void setRegisterMsg(RegisterHandler& handler)=0;
 	virtual const std::string& getObjectTypeName()=0;
-	virtual MsgHandlerMap& getRegisterHandler() {
-		return msgHandlerMap_;
-	}
+	virtual MsgHandlerMap& getRegisterHandler();
 	/* TODO:
 	 * if receive any type msg should be process after logining,will invoke this function
 	 *
@@ -68,18 +59,13 @@ protected:
 	/*
 	 * you can get NodeManager to manager node
 	 * */
-	NodeManager* getNodeManager() {
-		return &nodeManager_;
-	}
+	NodeManager* getNodeManager();
 	/*
 	 * you can get ObectType Object from objectType string
 	 * */
 	ObjectType* getObjectType(const std::string& objectType);
 private:
-	void setRegisterMsg_() {
-		RegisterHandler registerHandler(msgHandlerMap_);
-		setRegisterMsg(registerHandler);
-	}
+	void setRegisterMsg_();
 	void setNodeServer(NodeServer* nodeServer);
 
 private:

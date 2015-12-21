@@ -7,24 +7,17 @@
 
 #ifndef COLLECTION_RANDOMONLYID_H_
 #define COLLECTION_RANDOMONLYID_H_
-#include <cstdlib>
-#include <ctime>
-#include <boost/unordered_set.hpp>
 #include <khala/Keywords.h>
+#include <boost/unordered_set.hpp>
 #include <muduo/base/Mutex.h>
 namespace khala {
-#define Random() (rand()%((uint) 0-1))
 class RandomOnlyID {
 private:
-	RandomOnlyID() {
-		idSet_.insert(DEFAULT_ID);
-	}
+	RandomOnlyID();
 	RandomOnlyID(const RandomOnlyID&);
 	RandomOnlyID& operator =(const RandomOnlyID&);
 public:
-	static RandomOnlyID& getInstance() {
-		return randomOnlyID_;
-	}
+	static RandomOnlyID& getInstance();
 	uint getOnlyID();
 	void releaseID(uint);
 private:

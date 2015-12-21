@@ -2,11 +2,12 @@
  * MyUsrType.cpp
  *
  *  Created on: 2015年12月18日
- *      Author: root
+ *      Author: moss
  */
 
 #include "MyUsrType.h"
 #include "UsrInfo.h"
+#include <khala/ParseKey.h>
 #include <sstream>
 
 MyUsrType::MyUsrType() {

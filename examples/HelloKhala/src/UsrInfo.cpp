@@ -2,7 +2,7 @@
  * UsrInfo.cpp
  *
  *  Created on: 2015年12月19日
- *      Author: root
+ *      Author: moss
  */
 
 #include "UsrInfo.h"

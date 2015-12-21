@@ -30,10 +30,7 @@ namespace khala {
 #define MY_EVENT "myEvent"
 #define ADD_FRIEND "addFriend"
 #define GET_FRIENDS "getFriends"
-//#define SUBSCRIBE_TYPE "subscribe"
-//#define UNSUBSCRIBE_TYPE "unsubscribe"
-//#define AVAILABLE_RES_TYPE "available_res"
-//#define SUBSCRIBED_RES_TYPE "subscribed_res"
+
 
 //this is default node type
 #define TEMP_NODE_TYPE "temp_type"

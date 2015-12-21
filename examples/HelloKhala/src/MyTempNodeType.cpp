@@ -6,7 +6,7 @@
  */
 
 #include "MyTempNodeType.h"
-
+#include <khala/ParseKey.h>
 MyTempNodeType::MyTempNodeType() {
 	// TODO Auto-generated constructor stub
 

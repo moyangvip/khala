@@ -2,7 +2,7 @@
  * UsrInfo.h
  *
  *  Created on: 2015年12月19日
- *      Author: root
+ *      Author: moss
  */
 
 #ifndef USRINFO_H_

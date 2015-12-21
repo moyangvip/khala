@@ -7,53 +7,35 @@
 
 #ifndef COLLECTION_CONNNODE_H_
 #define COLLECTION_CONNNODE_H_
-#include <muduo/net/TcpConnection.h>
-#include <boost/shared_ptr.hpp>
 #include <khala/ConnNode.h>
-#include <khala/Keywords.h>
 namespace khala {
-typedef muduo::net::TcpConnectionPtr TcpConnectionPtr;
+
 class ObjectType;
 class InfoNode {
 public:
-	InfoNode(ConnNodePtr& connNodePtr, muduo::Timestamp time, uint id =
+	InfoNode(ConnNodePtr& connNodePtr, Timestamp time, uint id =
 	DEFAULT_ID);
 	/*
 	 * conn's life cycle is bind with connNode,and connNode's life cycle is bind with
 	 * InfoNode,if InfoNode is destructed,and connNode has no other ref,connNode will
 	 * be destructed too,and forceClose conn
 	 * */
-	~InfoNode() {
-	}
+	~InfoNode();
 
-	TcpConnectionPtr& getConn() {
-		return connNodePtr_->getTcpConnectionPtr();
-	}
-	uint getId() const {
-		return connNodePtr_->getId();
-	}
+	TcpConnectionPtr& getConn();
+	uint getId() const;
 	/*
 	 * if you use TmpId as InfoNode key,never invoking setID
 	 * */
-	void setId(uint id) {
-		connNodePtr_->setId(id);
-	}
+	void setId(uint id);
 
-	const std::string& getNodeType() const {
-		return objectType_;
-	}
+	const std::string& getNodeType() const;
 
 	void setNodeType(ObjectType* objectType);
-	void send(const std::string& msg) {
-		connNodePtr_->send(msg);
-	}
-	LoginStatus getStatus() {
-		return connNodePtr_->getStatus();
-	}
+	void send(const std::string& msg);
+	LoginStatus getStatus();
 
-	void setStatus(LoginStatus loginStatus) {
-		connNodePtr_->setStatus(loginStatus);
-	}
+	void setStatus(LoginStatus loginStatus);
 	/*
 	 * you can new object to extraContext_ when you login
 	 * pay attention to release it when node release
@@ -62,13 +44,9 @@ public:
 	 * shared_ptr<UsrObject> ptr(new UsrObject);
 	 * infoNode.setExtraContext(ptr);
 	 */
-	void setExtraContext(const boost::any& context) {
-		extraContext_ = context;
-	}
+	void setExtraContext(const boost::any& context);
 
-	const boost::any& getExtraContext() const {
-		return extraContext_;
-	}
+	const boost::any& getExtraContext() const;
 private:
 	//if connNode is login,the conn's life cycle will be bind with the InfoNode
 	ConnNodePtr connNodePtr_;
