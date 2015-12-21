@@ -4,9 +4,10 @@
  *  Created on: Dec 8, 2015
  *      Author: moss
  */
-#include <khala/NodeServer.h>
 #include <khala/NodeType.h>
+#include <khala/NodeServer.h>
 #include <khala/ParseKey.h>
+#include <khala/Keywords.h>
 #include <muduo/base/Logging.h>
 #include <sstream>
 using namespace khala;
@@ -25,12 +26,85 @@ bool NodeType::onLogoutMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	return true;
 }
 
-
 bool NodeType::onNodeIdMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
-			Timestamp time){
+		Timestamp time) {
 	uint id = infoNodePtr->getId();
 	std::stringstream ss;
-	ss<<"Node id:"<<id;
+	ss << "Node id:" << id;
 	infoNodePtr->send(ss.str());
 	return true;
+}
+NodeType::NodeType() {
+}
+NodeType::~NodeType() {
+}
+NodeType* NodeType::getInstance() {
+	static NodeType nodeType;
+	return &nodeType;
+}
+/*
+ * you can do sth as logining checking login with databases,
+ * you can invoke InfoNodePtr->setId() and set a UNIQUE id as the conn key
+ * or default use connNode's tmpID as id key(i promise login success:->)
+ * if check false,just return false,and onLoginSuccessMsg will not be invoked
+ * if you return true,not sure login success,if you set node id is not unique,logining will be failure
+ * */
+bool NodeType::onLoginCheckMsg(InfoNodePtr&, Json::Value& msg, Timestamp time) {
+	return true;
+}
+/*
+ * if you login success...
+ * */
+bool NodeType::onLoginSuccessMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	infoNodePtr->send("login success!");
+	return true;
+}
+/*
+ * if you login failure,such as logined id
+ * */
+bool NodeType::onLoginFailureMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	infoNodePtr->send("err,logined id!");
+	return true;
+}
+/*
+ * you can do sth when logout
+ * after this function,will invoke destroyConnNode() to release node resources
+ * */
+bool NodeType::onLogoutMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	infoNodePtr->send("logout success!");
+	return true;
+}
+/*
+ * destroy node resources.
+ * if you do not set any node resources,do nothing
+ * can not use InfoNodePtr->getConn() to send sth;
+ * */
+void NodeType::releaseConnNode(InfoNodePtr& infoNodePtr, Timestamp time) {
+
+}
+/*
+ * you can register msg at here
+ * for example:
+ * you can create a function as onLoginMsg:
+ * bool onLoginMsg(ConnNodePtr& connNode, Json::Value& msg,muduo::Timestamp time)
+ * and you can register this function like:
+ * handler.setRegisterMsg(LOGIN_TYPE, boost::bind(&NodeType::onLoginMsg, this, _1, _2, _3));
+ * when you receive a msg type as LOGIN_TYPE,the function setRegisterMsg will be invoking
+ * Notice:LOGIN_TYPE and LOGOUT_TYPE are Reserved words,you can't set as TYPE str
+ * */
+void NodeType::setRegisterMsg(RegisterHandler& handler) {
+	handler.setRegisterMsg(LOGOUT_TYPE,
+			boost::bind(&NodeType::onLogoutMsg_, this, _1, _2, _3));
+	handler.setRegisterMsg(NODE_ID_TYPE,
+			boost::bind(&NodeType::onNodeIdMsg, this, _1, _2, _3));
+}
+/*
+ * you must set a unique string type as the NodeType's key!
+ */
+const std::string& NodeType::getObjectTypeName() {
+	static std::string typeStr(LOGIN_NODE_TYPE);
+	return typeStr;
 }

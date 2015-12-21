@@ -4,12 +4,13 @@
  *  Created on: Dec 3, 2015
  *      Author: moss
  */
-
-#include <boost/bind.hpp>
+#include <khala/NodeServer.h>
 #include <khala/Config.h>
 #include <khala/HeadCode.h>
-#include <khala/NodeServer.h>
 #include <khala/ParseKey.h>
+#include <khala/NodeType.h>
+#include <json/json.h>
+#include <boost/bind.hpp>
 #include <muduo/base/Logging.h>
 using namespace khala;
 NodeServer::NodeServer(const InetAddress& listenAddr) :

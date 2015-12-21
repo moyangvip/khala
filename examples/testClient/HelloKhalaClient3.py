@@ -1,16 +1,24 @@
 #moss's HelloKhala Client
 #add time,myEvent type
 #update login,can choose dev type
+#add addFriend getFriends
 import socket
 import struct
 import json
-
+import string
+def usrLogin():
+	name = raw_input('[please input your name]:')
+	passwd = raw_input('[please input your passwd]:')
+	send = {'type':'login','node_type':'my_usr_type','name':name,'passwd':passwd}
+	return send
 def login():
-	dev = raw_input('[choose dev type]: 1 myNodeType, 2 nodeType\n[input choose]:')
+	dev = raw_input('[choose dev type]: 1 myNodeType, 2 nodeType 3 usrType\n[input choose]:')
 	if dev == '1':
 		send = {'type': 'login','node_type':'my_node_type'}
 	elif dev == '2':
 		send = {'type': 'login','node_type':'login_type'}
+	elif dev == '3':
+		send = usrLogin()
 	else:
 		send = {'type': 'login'}
 	return send
@@ -32,12 +40,21 @@ def time():
 def myEvent():
         send = {'type':'myEvent'}
         return send
+def addFriend():
+	while True:
+		friendId = raw_input('[please input friend id]:')
+		if friendId.isdigit():break
+	send = {'type':'addFriend','friend_id':string.atoi(friendId)}
+	return send
+def getFriends():
+	send = {'type':'getFriends'}
+	return send
 def default():
 	return -1
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', 2007))
-operator = {'login':login,'logout':logout,'devType':devType,'isLogin':isLogin,'nodeId':nodeId,'time':time,'myEvent':myEvent}  
+operator = {'login':login,'logout':logout,'devType':devType,'isLogin':isLogin,'nodeId':nodeId,'time':time,'myEvent':myEvent,'addFriend':addFriend,'getFriends':getFriends}  
 while True:
 	input = raw_input('[input cmd]:')
 	sendStr = operator.get(input,default)()

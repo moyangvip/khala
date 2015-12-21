@@ -5,6 +5,7 @@
  *      Author: moss
  */
 #include <khala/InfoNodePool.h>
+#include <typeinfo>
 using namespace khala;
 bool InfoNodePool::find(uint id, InfoNodePtr& infoNodePtr) {
 	muduo::MutexLockGuard lock(connNodeMapLock_);

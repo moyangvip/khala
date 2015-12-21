@@ -7,10 +7,9 @@
 
 #ifndef COLLECTION_NODEPOOL_H_
 #define COLLECTION_NODEPOOL_H_
+#include <khala/InfoNode.h>
 #include <muduo/base/Mutex.h>
 #include <boost/unordered_map.hpp>
-#include <khala/InfoNode.h>
-#include <typeinfo>
 #include <vector>
 namespace khala {
 class ObjectType;

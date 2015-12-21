@@ -8,12 +8,8 @@
 #include <khala/ObjectType.h>
 #include <khala/ParseKey.h>
 using namespace khala;
-void ObjectType::setNodeServer(NodeServer* nodeServer) {
-	nodeServer_ = nodeServer;
-	nodeManager_.setNodeServer(nodeServer);
-}
-ObjectType* ObjectType::getObjectType(const std::string& objectType){
-	return nodeServer_->getObjectType(objectType);
+RegisterHandler::RegisterHandler(MsgHandlerMap& msgHandlerMap) :
+		msgHandlerMap_(msgHandlerMap) {
 }
 bool RegisterHandler::setRegisterMsg(const std::string & type,
 		const RegisterMessageCallback& cb) {
@@ -26,4 +22,29 @@ bool RegisterHandler::setRegisterMsg(const std::string & type,
 	}
 	msgHandlerMap_[type] = cb;
 	return true;
+}
+void ObjectType::setNodeServer(NodeServer* nodeServer) {
+	nodeServer_ = nodeServer;
+	nodeManager_.setNodeServer(nodeServer);
+}
+ObjectType* ObjectType::getObjectType(const std::string& objectType) {
+	return nodeServer_->getObjectType(objectType);
+}
+ObjectType::ObjectType() :
+		nodeServer_(0) {
+}
+ObjectType::~ObjectType() {
+}
+ObjectType* ObjectType::getInstance() {
+	return (ObjectType *) 0;
+}
+MsgHandlerMap& ObjectType::getRegisterHandler() {
+	return msgHandlerMap_;
+}
+NodeManager* ObjectType::getNodeManager() {
+	return &nodeManager_;
+}
+void ObjectType::setRegisterMsg_() {
+	RegisterHandler registerHandler(msgHandlerMap_);
+	setRegisterMsg(registerHandler);
 }

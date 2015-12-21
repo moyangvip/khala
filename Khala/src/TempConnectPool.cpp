@@ -6,7 +6,23 @@
  */
 #include <khala/TempConnectPool.h>
 #include <muduo/base/Timestamp.h>
+#include <muduo/base/Logging.h>
 using namespace khala;
+TempConnectPool::TempConnectPool(int idleAliveTime) :
+		idleAliveTime_(idleAliveTime) {
+}
+void TempConnectPool::setIdleAliveTime(int idleAliveTime) {
+	idleAliveTime_ = idleAliveTime;
+}
+bool TempConnectPool::push_front(ConnNodePtr& tempNodePtr) {
+	uint id = tempNodePtr->getTmpId();
+	return tmpMap_.push_front(id, tempNodePtr);
+}
+void TempConnectPool::remove(uint id) {
+	//must be lock,otherwise may create null point
+	muduo::MutexLockGuard lock(tmpMapLock_);
+	tmpMap_.remove(id);
+}
 void TempConnectPool::checkTempConnect() {
 	muduo::MutexLockGuard lock(tmpMapLock_);
 	while (tmpMap_.size() > 0) {
@@ -15,7 +31,9 @@ void TempConnectPool::checkTempConnect() {
 			break;
 		if (addTime(p->getLastReceiveTime(), idleAliveTime_)
 				< muduo::Timestamp::now()) {
-			LOG_INFO<<p->getTcpConnectionPtr()->peerAddress().toIpPort()<<" temp ID:"<<p->getTmpId()<<" is OVERTIME,will be disconnect!";
+			LOG_INFO << p->getTcpConnectionPtr()->peerAddress().toIpPort()
+					<< " temp ID:" << p->getTmpId()
+					<< " is OVERTIME,will be disconnect!";
 			//FIXME:may be force close when sending...
 			p->getTcpConnectionPtr()->send("err,connect overtime!");
 			tmpMap_.pop_back();

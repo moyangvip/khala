@@ -7,6 +7,7 @@
 
 #include <khala/HeadCode.h>
 #include <muduo/base/Logging.h>
+#include <cstddef>
 using namespace khala;
 HeadCode::HeadCode() {
 

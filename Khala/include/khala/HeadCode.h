@@ -8,7 +8,6 @@
 #ifndef HEADCODE_H_
 #define HEADCODE_H_
 #include <muduo/net/TcpConnection.h>
-#include <cstddef>
 namespace khala {
 class HeadCode {
 public:

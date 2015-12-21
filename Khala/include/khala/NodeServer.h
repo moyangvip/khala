@@ -8,16 +8,13 @@
 #ifndef NODESERVER_H_
 #define NODESERVER_H_
 
-#include <json/json.h>
 #include <khala/InfoNodePool.h>
 #include <khala/MsgController.h>
-#include <khala/NodeType.h>
 #include <khala/TempConnectPool.h>
-#include <muduo/net/TcpServer.h>
 #include <muduo/net/EventLoop.h>
 namespace khala {
-typedef muduo::net::InetAddress InetAddress;
 class RegisterMsg;
+class NodeType;
 class NodeServer {
 public:
 	NodeServer(const InetAddress& listenAddr);

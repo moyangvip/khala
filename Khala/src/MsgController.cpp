@@ -4,15 +4,14 @@
  *  Created on: Dec 3, 2015
  *      Author: moss
  */
-#include <khala/ConnID.h>
 #include <khala/MsgController.h>
 #include <khala/NodeServer.h>
 #include <khala/NodeType.h>
 #include <khala/ParseKey.h>
 #include <muduo/base/Logging.h>
 using namespace khala;
-void MsgController::onDispatcher(const TcpConnectionPtr& conn,
-		Json::Value& msg, Timestamp time, std::string& typeStr) {
+void MsgController::onDispatcher(const TcpConnectionPtr& conn, Json::Value& msg,
+		Timestamp time, std::string& typeStr) {
 	InfoNodePtr infoNodePtr = getConnNode(conn);
 	//try to match the type handler
 	ObjectType* objectType = 0;
@@ -30,9 +29,10 @@ void MsgController::onDispatcher(const TcpConnectionPtr& conn,
 				//run the real msg function
 				if ((it->second)(infoNodePtr, msg, time)) {
 					//try to update tmp conn to pool head
-					if(infoNodePtr->getStatus() == NO_LOGIN_STATUS){
+					if (infoNodePtr->getStatus() == NO_LOGIN_STATUS) {
 						uint tmpId = TMP_ID_CONN(conn);
-						nodeServer_->getTempConnectPool()->updateTempConnect(tmpId);
+						nodeServer_->getTempConnectPool()->updateTempConnect(
+								tmpId);
 					}
 				} else {
 					//handler run err
@@ -75,7 +75,7 @@ bool MsgController::onBeforeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
 bool MsgController::onBeforeMessage_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
 	if (infoNodePtr->getStatus() != LOGIN_STATUS) {
-		muduo::net::TcpConnectionPtr& conn = infoNodePtr->getConn();
+		TcpConnectionPtr& conn = infoNodePtr->getConn();
 		LOG_ERROR<<conn->peerAddress().toIpPort()<<" temp ID:"<<TMP_ID_CONN(conn)<<" NO LOGIN Type:"<<msg[MSG_TYPE].asString();
 		ObjectType* objectType = 0;
 		this->getObjectType(TEMP_NODE_TYPE, &objectType);
@@ -90,7 +90,7 @@ bool MsgController::onBeforeMessage_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	return true;
 }
 void MsgController::onConnection(const TcpConnectionPtr& conn,
-		muduo::Timestamp time) {
+		Timestamp time) {
 	ConnNodePtr tempNodePtr(new ConnNode(conn, time));
 	if (nodeServer_->getTempConnectPool()->push_front(tempNodePtr)) {
 		LOG_INFO << conn->peerAddress().toIpPort() << " tmp ID:"
@@ -142,8 +142,8 @@ void MsgController::onErrRunMessage(const TcpConnectionPtr& conn,
 	//conn->send("err,running err!");
 }
 
-bool MsgController::isLogin(const TcpConnectionPtr& conn,
-		Json::Value& msg, Timestamp time) {
+bool MsgController::isLogin(const TcpConnectionPtr& conn, Json::Value& msg,
+		Timestamp time) {
 	uint id = ID_CONN(conn);
 	if (!nodeServer_->getNodePool()->hasNode(id)) {
 		LOG_ERROR<<conn->peerAddress().toIpPort()<<" temp ID:"<<TMP_ID_CONN(conn)<<" No Login Type REQ!";
@@ -151,8 +151,7 @@ bool MsgController::isLogin(const TcpConnectionPtr& conn,
 	}
 	return true;
 }
-InfoNodePtr MsgController::getConnNode(
-		const TcpConnectionPtr& conn) {
+InfoNodePtr MsgController::getConnNode(const TcpConnectionPtr& conn) {
 	uint id = ID_CONN(conn);
 	InfoNodePtr infoNodePtr;
 	if (!nodeServer_->getNodePool()->find(id, infoNodePtr)) {
@@ -161,7 +160,7 @@ InfoNodePtr MsgController::getConnNode(
 		ConnNodePtr connNodePtr;
 		if (nodeServer_->getTempConnectPool()->find(tmpId, connNodePtr)) {
 			InfoNodePtr tmpPtr(
-					new InfoNode(connNodePtr, muduo::Timestamp::now()));
+					new InfoNode(connNodePtr,Timestamp::now()));
 			infoNodePtr.swap(tmpPtr);
 		}
 	}
@@ -175,6 +174,7 @@ bool MsgController::addObjectType(const std::string& objectTypeStr,
 		return false;
 	}
 	objectTypeMap_[objectTypeStr] = objectType;
+	LOG_INFO<<"Add "<<objectTypeStr<<" as Server dev Type success!";
 	return true;
 }
 bool MsgController::getObjectType(const std::string& objectTypeStr,
@@ -190,4 +190,7 @@ bool MsgController::getObjectType(const std::string& objectTypeStr,
 		(*objectType) = it->second;
 	}
 	return false;
+}
+void MsgController::setTempNodeType(TempNodeType* tempNodeType) {
+	objectTypeMap_[TEMP_NODE_TYPE] = tempNodeType;
 }
