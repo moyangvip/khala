@@ -55,8 +55,8 @@ void NodeServer::onConnection(const TcpConnectionPtr& conn) {
 
 void NodeServer::onMessage(const TcpConnectionPtr& conn,
 		muduo::net::Buffer* buf, Timestamp time) {
-	HeadCode headCode;
-	std::string msg = headCode.onCode(conn, buf, time);
+	HeadCode* headCode = HeadCode::getInstance();
+	std::string msg = headCode->onCode(conn, buf, time);
 	if (!msg.empty()) {
 		onDispatcher(conn, msg, time);
 	}

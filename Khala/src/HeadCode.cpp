@@ -9,8 +9,12 @@
 #include <muduo/base/Logging.h>
 #include <cstddef>
 using namespace khala;
+HeadCode HeadCode::headCode_;
 HeadCode::HeadCode() {
 
+}
+HeadCode* HeadCode::getInstance(){
+	return &headCode_;
 }
 std::string HeadCode::onCode(const muduo::net::TcpConnectionPtr& conn,
 		                 muduo::net::Buffer* buf,
@@ -35,4 +39,12 @@ std::string HeadCode::onCode(const muduo::net::TcpConnectionPtr& conn,
 		}
 	}
 	return message;
+}
+muduo::net::Buffer HeadCode::addHeadCode(const std::string& msg){
+	muduo::net::Buffer buff;
+	buff.append(msg);
+	int32_t len = static_cast<int32_t>(msg.size());
+	int32_t be32 = muduo::net::sockets::hostToNetwork32(len);
+	buff.prepend(&be32,sizeof(be32));
+	return buff;
 }

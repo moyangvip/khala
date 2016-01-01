@@ -7,6 +7,7 @@
 
 #include <khala/ConnNode.h>
 #include <khala/RandomOnlyID.h>
+#include <khala/HeadCode.h>
 #include <muduo/base/Logging.h>
 
 using namespace khala;
@@ -56,6 +57,12 @@ LoginStatus ConnNode::getStatus() {
 void ConnNode::setStatus(LoginStatus loginStatus) {
 	loginStatus_ = loginStatus;
 }
-void ConnNode::send(const std::string& msg) {
-	conn_->send(msg);
+void ConnNode::send(const std::string& msg,bool addHead) {
+	if(addHead){
+		HeadCode* headCode = HeadCode::getInstance();
+		muduo::net::Buffer buff = headCode->addHeadCode(msg);
+		conn_->send(&buff);
+	}else{
+		conn_->send(msg);
+	}
 }

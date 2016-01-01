@@ -8,7 +8,7 @@
 #include <khala/ParseKey.h>
 #include <khala/ObjectType.h>
 using namespace khala;
-InfoNode::InfoNode(ConnNodePtr& connNodePtr, Timestamp time, uint id ) :
+InfoNode::InfoNode(ConnNodePtr& connNodePtr, uint id ) :
 		connNodePtr_(connNodePtr), objectType_(TEMP_NODE_TYPE) {
 	//set TmpId as default id key
 	if (id == DEFAULT_ID) {

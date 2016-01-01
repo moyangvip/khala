@@ -32,6 +32,7 @@ while True:
 		continue
 	strjson = json.dumps(sendStr)
 	print '[send msg]:',strjson
+	#get msg len,and hostToNetWork32
 	inputLen = len(strjson)
 	pstr = '>I'+ str(inputLen)+'s'
 	bytes = struct.pack(pstr, inputLen,strjson)
@@ -40,9 +41,12 @@ while True:
 	if len(d) == 0:
 		print 'exit'
 		break
-	print '[rev msg]:',d
+	#parse msg,and networkToHost
+	parseStr = '>I' + str(len(d)-4) + 's'
+	resLen,resStr = struct.unpack(parseStr,d)
+	print '[rev msg]:',resStr
 	print ''
-	if d == 'logout success!':
+	if resStr == 'logout success!':
 		print 'exit'
 		break
 s.close()

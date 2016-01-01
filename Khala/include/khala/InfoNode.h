@@ -13,7 +13,7 @@ namespace khala {
 class ObjectType;
 class InfoNode {
 public:
-	InfoNode(ConnNodePtr& connNodePtr, Timestamp time, uint id =
+	InfoNode(ConnNodePtr& connNodePtr,  uint id =
 	DEFAULT_ID);
 	/*
 	 * conn's life cycle is bind with connNode,and connNode's life cycle is bind with

@@ -160,7 +160,7 @@ InfoNodePtr MsgController::getConnNode(const TcpConnectionPtr& conn) {
 		ConnNodePtr connNodePtr;
 		if (nodeServer_->getTempConnectPool()->find(tmpId, connNodePtr)) {
 			InfoNodePtr tmpPtr(
-					new InfoNode(connNodePtr,Timestamp::now()));
+					new InfoNode(connNodePtr));
 			infoNodePtr.swap(tmpPtr);
 		}
 	}

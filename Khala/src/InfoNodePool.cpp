@@ -25,27 +25,27 @@ bool InfoNodePool::setNewConnNode(uint id, InfoNodePtr& infoNodePtr) {
 	connNodeMap_[id] = infoNodePtr;
 	return true;
 }
-std::vector<uint> InfoNodePool::getNodeByType(ObjectType* objectType){
-		std::vector<uint> result;
-		muduo::MutexLockGuard lock(connNodeMapLock_);
-		typename NewMap::iterator it = connNodeMap_.begin();
-		while(it != connNodeMap_.end()){
-			if(typeid(it->second->getNodeType()) == typeid(objectType)){
-				result.push_back(it->first);
-			}
-			++it;
+std::vector<uint> InfoNodePool::getNodeByType(const std::string& type) {
+	std::vector<uint> result;
+	muduo::MutexLockGuard lock(connNodeMapLock_);
+	typename NewMap::iterator it = connNodeMap_.begin();
+	while (it != connNodeMap_.end()) {
+		if (it->second->getNodeType() == type) {
+			result.push_back(it->first);
 		}
-		return result;
+		++it;
 	}
+	return result;
+}
 bool InfoNodePool::hasNode(uint id) {
 	muduo::MutexLockGuard lock(connNodeMapLock_);
 	typename NewMap::iterator it = connNodeMap_.find(id);
 	return it != connNodeMap_.end();
 }
 void InfoNodePool::remove(uint id) {
-		muduo::MutexLockGuard lock(connNodeMapLock_);
-		typename NewMap::iterator it = connNodeMap_.find(id);
-		if (it == connNodeMap_.end())
-			return;
-		connNodeMap_.erase(it);
-	}
+	muduo::MutexLockGuard lock(connNodeMapLock_);
+	typename NewMap::iterator it = connNodeMap_.find(id);
+	if (it == connNodeMap_.end())
+		return;
+	connNodeMap_.erase(it);
+}

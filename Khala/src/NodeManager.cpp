@@ -5,7 +5,7 @@
  *      Author: moss
  */
 #include <khala/NodeManager.h>
-#include <khala/NodeServer.h>
+#include <khala/ObjectType.h>
 using namespace khala;
 bool NodeManager::hasNode(uint id) {
 	return nodeServer_->getNodePool()->hasNode(id);
@@ -14,10 +14,9 @@ bool NodeManager::find(uint id, InfoNodePtr& infoNodePtr) {
 	return nodeServer_->getNodePool()->find(id, infoNodePtr);
 }
 std::vector<uint> NodeManager::getNodeIDs(ObjectType* objectType) {
-	return nodeServer_->getNodePool()->getNodeByType(objectType);
+	return getNodeIDs(objectType->getObjectTypeName());
 }
-std::vector<uint> NodeManager::getNodeIDs(std::string& type) {
-	ObjectType* objectType = 0;
-	nodeServer_->getMsgController().getObjectType(type, &objectType);
-	return getNodeIDs(objectType);
+std::vector<uint> NodeManager::getNodeIDs(const std::string& type) {
+	return nodeServer_->getNodePool()->getNodeByType(type);
 }
+

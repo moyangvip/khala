@@ -31,7 +31,12 @@ bool NodeType::onNodeIdMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	uint id = infoNodePtr->getId();
 	std::stringstream ss;
 	ss << "Node id:" << id;
-	infoNodePtr->send(ss.str());
+	Json::Value res;
+	res[MSG_TYPE] = NODE_ID_TYPE;
+	res[DATA] = ss.str();
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 	return true;
 }
 NodeType::NodeType() {
@@ -57,7 +62,13 @@ bool NodeType::onLoginCheckMsg(InfoNodePtr&, Json::Value& msg, Timestamp time) {
  * */
 bool NodeType::onLoginSuccessMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
-	infoNodePtr->send("login success!");
+	Json::Value res;
+	res[MSG_TYPE] = LOGIN_TYPE;
+	res[RESULT] = "true";
+	res[DATA] = "login success!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 	return true;
 }
 /*
@@ -65,7 +76,13 @@ bool NodeType::onLoginSuccessMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
  * */
 bool NodeType::onLoginFailureMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
-	infoNodePtr->send("err,logined id!");
+	Json::Value res;
+	res[MSG_TYPE] = LOGIN_TYPE;
+	res[RESULT] = "false";
+	res[DATA] = "err,logined id!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 	return true;
 }
 /*
@@ -74,7 +91,13 @@ bool NodeType::onLoginFailureMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
  * */
 bool NodeType::onLogoutMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
-	infoNodePtr->send("logout success!");
+	Json::Value res;
+	res[MSG_TYPE] = LOGOUT_TYPE;
+	res[RESULT] = "true";
+	res[DATA] = "logout success!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 	return true;
 }
 /*

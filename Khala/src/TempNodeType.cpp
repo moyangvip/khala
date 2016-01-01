@@ -28,24 +28,34 @@ const std::string& TempNodeType::getObjectTypeName() {
 /*
  * if receive any no register type msg with this nodeType,will invoke this function
  * */
-void TempNodeType::onErrTypeMessage(InfoNodePtr& infoNodePtr,
-		Json::Value& msg, Timestamp time) {
-	infoNodePtr->send("err type req!");
+void TempNodeType::onErrTypeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = ERR_TYPE;
+	res[DATA] = "err type req!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 }
 /*
  * if  any msg handler return false,will invoke this function
  * */
-void TempNodeType::onErrRunMessage(InfoNodePtr& infoNodePtr,
-		Json::Value& msg, Timestamp time) {
-	infoNodePtr->send("err,running err!");
+void TempNodeType::onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = ERR_RUN;
+	res[DATA] = "err,running err!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 }
 bool TempNodeType::onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
 	muduo::net::TcpConnectionPtr& conn = infoNodePtr->getConn();
 	if (infoNodePtr->getStatus() == LOGIN_STATUS) {
 		//has logined
-		LOG_WARN << conn->peerAddress().toIpPort() << " ID:"
-				<< infoNodePtr->getId() << " reloading";
+		LOG_WARN<< conn->peerAddress().toIpPort() << " ID:"
+		<< infoNodePtr->getId() << " reloading";
 		ObjectType* objectType = nodeServer_->getObjectType(
 				infoNodePtr->getNodeType());
 		NodeType* nodeType = dynamic_cast<NodeType*>(objectType);
@@ -59,14 +69,14 @@ bool TempNodeType::onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	if (nodeType == 0)
 		return false;
 	if (!nodeType->onLoginCheckMsg(infoNodePtr, msg, time)) {
-		LOG_ERROR << conn->peerAddress().toIpPort() << "tmp ID:"
-				<< TMP_ID_CONN(conn) << " login failure!";
+		LOG_ERROR<< conn->peerAddress().toIpPort() << "tmp ID:"
+		<< TMP_ID_CONN(conn) << " login failure!";
 		return true;
 	}
 	uint id = infoNodePtr->getId();
 	if (id == DEFAULT_ID) {
-		LOG_ERROR << conn->peerAddress().toIpPort() << " ID:" << id
-				<< " DO NOT SET DEFAULT ID AS KEY!";
+		LOG_ERROR<< conn->peerAddress().toIpPort() << " ID:" << id
+		<< " DO NOT SET DEFAULT ID AS KEY!";
 		nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
 		return false;
 	}
@@ -80,14 +90,14 @@ bool TempNodeType::onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 			return nodeType->onLoginSuccessMsg(infoNodePtr, msg, time);
 		} else {
 			//loading err,can't set id,may other threading is login with the id
-			LOG_ERROR << conn->peerAddress().toIpPort() << " ID:" << id
-					<< " login err!";
+			LOG_ERROR<< conn->peerAddress().toIpPort() << " ID:" << id
+			<< " login err!";
 			return nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
 		}
 	} else {
 		//the id has login
 		LOG_ERROR << conn->peerAddress().toIpPort() << " ID:" << id
-				<< " Has logined id!";
+		<< " Has logined id!";
 		return nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
 	}
 	return true;
@@ -99,25 +109,25 @@ void TempNodeType::onLoginTypeCheck(InfoNodePtr& infoNodePtr,
 	//set nodeType as the default nodetype
 	ObjectType* nodeType = 0;
 	if (nodeTypeStr == TEMP_NODE_TYPE) {
-		LOG_ERROR << conn->peerAddress().toIpPort() << " temp ID:"
-				<< TMP_ID_CONN(conn)
-				<< " can't set Node Type as TEMP_NODE_TYPE!";
+		LOG_ERROR<< conn->peerAddress().toIpPort() << " temp ID:"
+		<< TMP_ID_CONN(conn)
+		<< " can't set Node Type as TEMP_NODE_TYPE!";
 		nodeServer_->getMsgController().getObjectType(LOGIN_NODE_TYPE,
 				&nodeType);
 	} else {
 		if (nodeTypeStr != "") {
 			if (!nodeServer_->getMsgController().getObjectType(nodeTypeStr,
-					&nodeType)) {
+							&nodeType)) {
 				LOG_ERROR << conn->peerAddress().toIpPort() << " temp ID:"
-						<< TMP_ID_CONN(conn) << " err Node Type:" << nodeTypeStr
-						<< "!";
+				<< TMP_ID_CONN(conn) << " err Node Type:" << nodeTypeStr
+				<< "!";
 				nodeServer_->getMsgController().getObjectType(LOGIN_NODE_TYPE,
 						&nodeType);
 			}
 		} else {
 			LOG_ERROR << conn->peerAddress().toIpPort() << " temp ID:"
-					<< TMP_ID_CONN(conn) << " err Node Type:" << nodeTypeStr
-					<< "!";
+			<< TMP_ID_CONN(conn) << " err Node Type:" << nodeTypeStr
+			<< "!";
 			nodeServer_->getMsgController().getObjectType(LOGIN_NODE_TYPE,
 					&nodeType);
 		}
@@ -137,16 +147,26 @@ void TempNodeType::setRegisterMsg(RegisterHandler& handler) {
 }
 bool TempNodeType::onDevTypeMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = DEV_TYPE;
 	std::string devType = infoNodePtr->getNodeType();
-	infoNodePtr->send("devType:" + devType);
+	res[DATA] = "devType:" + devType;
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 	return true;
 }
 bool TempNodeType::onIsLoginMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = IS_LOGIN_TYPE;
 	if (infoNodePtr->getStatus() == NO_LOGIN_STATUS) {
-		infoNodePtr->send("Login status: off");
+		res[DATA] = "Login status: off";
 	} else {
-		infoNodePtr->send("Login status: on");
+		res[DATA] = "Login status: on";
 	}
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 	return true;
 }

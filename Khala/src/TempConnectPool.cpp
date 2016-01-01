@@ -5,8 +5,11 @@
  *      Author: moss
  */
 #include <khala/TempConnectPool.h>
+#include <khala/HeadCode.h>
+#include <khala/ParseKey.h>
 #include <muduo/base/Timestamp.h>
 #include <muduo/base/Logging.h>
+#include <json/json.h>
 using namespace khala;
 TempConnectPool::TempConnectPool(int idleAliveTime) :
 		idleAliveTime_(idleAliveTime) {
@@ -34,8 +37,17 @@ void TempConnectPool::checkTempConnect() {
 			LOG_INFO << p->getTcpConnectionPtr()->peerAddress().toIpPort()
 					<< " temp ID:" << p->getTmpId()
 					<< " is OVERTIME,will be disconnect!";
-			//FIXME:may be force close when sending...
-			p->getTcpConnectionPtr()->send("err,connect overtime!");
+
+			//FIXME:this should be improved
+			Json::Value res;
+			res[MSG_TYPE] = OVER_TIME;
+			res[DATA] = "err,connect overtime!";
+			Json::FastWriter jwriter;
+			std::string sendStr = jwriter.write(res);
+			muduo::net::Buffer buff = HeadCode::getInstance()->addHeadCode(
+					sendStr);
+			p->getTcpConnectionPtr()->send(&buff);
+
 			tmpMap_.pop_back();
 		} else {
 			//the last don't overtime,so all is ok
