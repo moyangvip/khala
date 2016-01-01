@@ -27,7 +27,10 @@ public:
 	LoginStatus getStatus();
 
 	void setStatus(LoginStatus loginStatus);
-	void send(const std::string& msg);
+	/*
+	 * if addHead = true,will add len head before msg
+	 * */
+	void send(const std::string& msg,bool addHead = true);
 private:
 	//careful conn life time
 	TcpConnectionPtr conn_;
