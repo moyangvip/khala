@@ -6,7 +6,7 @@
  */
 
 #include "MyNodeType.h"
-#include <khala/ParseKey.h>
+#include "MyParseKey.h"
 MyNodeType::MyNodeType() {
 	// TODO Auto-generated constructor stub
 

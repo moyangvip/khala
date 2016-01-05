@@ -7,7 +7,7 @@
 
 #include "ChatType.h"
 #include "UsrInfo.h"
-#include <khala/ParseKey.h>
+#include "MyParseKey.h"
 #include <khala/NodeManager.h>
 //#include"DAO/UsrInfoDao.h"
 ChatType::ChatType() {

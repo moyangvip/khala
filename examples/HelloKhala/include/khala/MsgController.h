@@ -29,6 +29,7 @@ public:
 	bool addObjectType(const std::string& objectTypeStr,ObjectType* objectType);
 	bool getObjectType(const std::string& objectTypeStr,ObjectType** objectType);
 	void setTempNodeType(TempNodeType* tempNodeType);
+	void onOverTime(InfoNodePtr& infoNodePtr,Timestamp time);
 private:
 	bool onBeforeMessage(InfoNodePtr& infoNodePtr,
 			Json::Value& msg, Timestamp time,const std::string& realHandlerType);
@@ -42,7 +43,9 @@ private:
 			InfoNodePtr& infoNodePtr, Timestamp time);
 	bool isLogin(const TcpConnectionPtr& conn, Json::Value& msg,
 			Timestamp time);
-	InfoNodePtr getConnNode(const TcpConnectionPtr& conn);
+	InfoNodePtr getInfoNode(const TcpConnectionPtr& conn);
+	void updateAliveTime(InfoNodePtr& infoNodePtr);
+private:
 	Json::FastWriter fastWriter;
 	NodeServer* nodeServer_;
 	typedef boost::unordered_map<std::string,ObjectType*> ObjectTypeMap;

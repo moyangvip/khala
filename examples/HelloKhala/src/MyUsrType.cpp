@@ -7,7 +7,7 @@
 
 #include "MyUsrType.h"
 #include "UsrInfo.h"
-#include <khala/ParseKey.h>
+#include "MyParseKey.h"
 #include <sstream>
 
 MyUsrType::MyUsrType() {

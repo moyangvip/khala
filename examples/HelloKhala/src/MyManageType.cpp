@@ -6,7 +6,7 @@
  */
 
 #include "MyManageType.h"
-#include <khala/ParseKey.h>
+#include "MyParseKey.h"
 MyManageType::MyManageType() {
 	// TODO Auto-generated constructor stub
 
