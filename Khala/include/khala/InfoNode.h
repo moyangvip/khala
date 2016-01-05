@@ -7,14 +7,15 @@
 
 #ifndef COLLECTION_CONNNODE_H_
 #define COLLECTION_CONNNODE_H_
-#include <khala/ConnNode.h>
+#include <khala/ConnID.h>
 namespace khala {
-
+enum LoginStatus {
+	NO_LOGIN_STATUS, LOGIN_STATUS,OVERTIME
+};
 class ObjectType;
 class InfoNode {
 public:
-	InfoNode(ConnNodePtr& connNodePtr,  uint id =
-	DEFAULT_ID);
+	InfoNode(const TcpConnectionPtr& conn);
 	/*
 	 * conn's life cycle is bind with connNode,and connNode's life cycle is bind with
 	 * InfoNode,if InfoNode is destructed,and connNode has no other ref,connNode will
@@ -28,11 +29,13 @@ public:
 	 * if you use TmpId as InfoNode key,never invoking setID
 	 * */
 	void setId(uint id);
+	uint getTempId() const;
+
 
 	const std::string& getNodeType() const;
 
 	void setNodeType(ObjectType* objectType);
-	void send(const std::string& msg);
+	void send(const std::string& msg, bool addHead = true);
 	LoginStatus getStatus();
 
 	void setStatus(LoginStatus loginStatus);
@@ -48,10 +51,14 @@ public:
 
 	const boost::any& getExtraContext() const;
 private:
-	//if connNode is login,the conn's life cycle will be bind with the InfoNode
-	ConnNodePtr connNodePtr_;
-	//default NodeType Instance as NodeType
+	void setTempId(uint id);
+private:
+	//conn's life cycle is bind with the InfoNode
+		TcpConnectionPtr conn_;
+	//default TempNodeType Instance as NodeType
 	std::string objectType_;
+	LoginStatus loginStatus_;
+	ConnIDPtr connIDPtr_;
 	/*
 	 * you can new object to extraContext_ when you login,pay attention to release it when node release
 	 * you should use shared_ptr to control your object's life cycle

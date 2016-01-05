@@ -10,13 +10,14 @@
 #include <khala/InfoNode.h>
 #include <khala/NodeManager.h>
 #include <json/json.h>
+#include <khala/ParseKey.h>
 #include <muduo/net/TcpServer.h>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/unordered_map.hpp>
 
 namespace khala {
-typedef boost::function<bool(InfoNodePtr&, Json::Value&, muduo::Timestamp)> RegisterMessageCallback;
+typedef boost::function<bool(InfoNodePtr&, Json::Value&, Timestamp)> RegisterMessageCallback;
 typedef boost::unordered_map<std::string, RegisterMessageCallback> MsgHandlerMap;
 class NodeServer;
 class RegisterHandler {
@@ -46,15 +47,20 @@ public:
 	 * if receive any no register type msg with this nodeType,will invoke this function
 	 * */
 	virtual void onErrTypeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-			muduo::Timestamp time) =0;
+			Timestamp time) =0;
 	/*
 	 * if  any msg handler return false,will invoke this function
 	 * */
 	virtual void onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-			muduo::Timestamp time) =0;
+			Timestamp time) =0;
+	/*
+	 * if node overTime,will invoke this function
+	 * the node connection will be disconnect soon
+	 * */
+	virtual void onOverTime(InfoNodePtr& infoNodePtr,Timestamp time) =0;
 	friend class NodeServer;
-	friend class TempNodeType;
 	friend class NodeType;
+	friend class TempNodeType;
 protected:
 	/*
 	 * you can get NodeManager to manager node
@@ -67,7 +73,6 @@ protected:
 private:
 	void setRegisterMsg_();
 	void setNodeServer(NodeServer* nodeServer);
-
 private:
 	MsgHandlerMap msgHandlerMap_;
 	NodeManager nodeManager_;
