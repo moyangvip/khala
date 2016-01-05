@@ -9,10 +9,12 @@
 #define CONFIG_H_
 namespace khala {
 #define USER_PORT 2007
-#define RESOURCE_PORT 2006
 
 #define USER_SERVER_THREAD_NUM 4
-#define DEFAULT_IDLE_ALIVE_TIME 60
+/*
+ * if DEFAULT_IDLE_ALIVE_TIME = 0,never overtime
+ * */
+#define DEFAULT_IDLE_ALIVE_TIME 0
 #define DEFAULT_CHECK_IDLE_TIME 10
 
 /*
@@ -21,7 +23,7 @@ namespace khala {
 #define DB_NAME "HomeServerDB"
 #define DB_ADDR "127.0.0.1"
 #define DB_USER_NAME "root"
-#define DB_PW "27793500"
+#define DB_PW "******"
  * */
 
 }

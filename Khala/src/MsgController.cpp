@@ -12,7 +12,12 @@
 using namespace khala;
 void MsgController::onDispatcher(const TcpConnectionPtr& conn, Json::Value& msg,
 		Timestamp time, std::string& typeStr) {
-	InfoNodePtr infoNodePtr = getConnNode(conn);
+	InfoNodePtr infoNodePtr = getInfoNode(conn);
+	//if infoNodePtr is overtime,abandon this msg...
+	if (infoNodePtr->getStatus() == OVERTIME) {
+		LOG_ERROR<<conn->peerAddress().toIpPort()<<" ID:"<<ID_CONN(conn)<<" temp ID:"<<TMP_ID_CONN(conn)<<" is OVERTIME,receive msg will be Abandoned!";
+		return;
+	}
 	//try to match the type handler
 	ObjectType* objectType = 0;
 	getObjectType(infoNodePtr->getNodeType(), &objectType);
@@ -29,11 +34,7 @@ void MsgController::onDispatcher(const TcpConnectionPtr& conn, Json::Value& msg,
 				//run the real msg function
 				if ((it->second)(infoNodePtr, msg, time)) {
 					//try to update tmp conn to pool head
-					if (infoNodePtr->getStatus() == NO_LOGIN_STATUS) {
-						uint tmpId = TMP_ID_CONN(conn);
-						nodeServer_->getTempConnectPool()->updateTempConnect(
-								tmpId);
-					}
+					updateAliveTime(infoNodePtr);
 				} else {
 					//handler run err
 					runRes = false;
@@ -89,18 +90,18 @@ bool MsgController::onBeforeMessage_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	}
 	return true;
 }
-void MsgController::onConnection(const TcpConnectionPtr& conn,
-		Timestamp time) {
-	ConnNodePtr tempNodePtr(new ConnNode(conn, time));
-	if (nodeServer_->getTempConnectPool()->push_front(tempNodePtr)) {
+void MsgController::onConnection(const TcpConnectionPtr& conn, Timestamp time) {
+	InfoNodePtr infoNodePtr(new InfoNode(conn));
+	if (nodeServer_->getTempNodePool()->setNewNode(infoNodePtr->getTempId(),
+			infoNodePtr)) {
 		LOG_INFO << conn->peerAddress().toIpPort() << " tmp ID:"
-				<< tempNodePtr->getTmpId() << " create!";
+				<< infoNodePtr->getTempId() << " create!";
 	}
 }
 void MsgController::onDisConnection(const TcpConnectionPtr& conn,
 		Timestamp time) {
-//try to remove from tmp pools
-	nodeServer_->getTempConnectPool()->remove(TMP_ID_CONN(conn));
+	//try to remove from tmp pools
+	nodeServer_->getTempNodePool()->remove(TMP_ID_CONN(conn));
 	uint id = ID_CONN(conn);
 	InfoNodePtr connNodePtr;
 	if (nodeServer_->getNodePool()->find(id, connNodePtr)) {
@@ -141,7 +142,20 @@ void MsgController::onErrRunMessage(const TcpConnectionPtr& conn,
 	}
 	//conn->send("err,running err!");
 }
+void MsgController::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
+	TcpConnectionPtr conn = infoNodePtr->getConn();
+	LOG_INFO << conn->peerAddress().toIpPort() << "  ID:"
+			<< infoNodePtr->getId() << " temp ID:" << infoNodePtr->getTempId()
+			<< " devType:" << infoNodePtr->getNodeType()
+			<< " is OVERTIME,will be disconnect!";
 
+	ObjectType* objectType = 0;
+	getObjectType(infoNodePtr->getNodeType(), &objectType);
+	//run in conn's thread loop
+	conn->getLoop()->runInLoop(
+			boost::bind(&TempNodeType::onOverTime_, (TempNodeType*)objectType, infoNodePtr,
+					time));
+}
 bool MsgController::isLogin(const TcpConnectionPtr& conn, Json::Value& msg,
 		Timestamp time) {
 	uint id = ID_CONN(conn);
@@ -151,17 +165,14 @@ bool MsgController::isLogin(const TcpConnectionPtr& conn, Json::Value& msg,
 	}
 	return true;
 }
-InfoNodePtr MsgController::getConnNode(const TcpConnectionPtr& conn) {
+InfoNodePtr MsgController::getInfoNode(const TcpConnectionPtr& conn) {
 	uint id = ID_CONN(conn);
 	InfoNodePtr infoNodePtr;
 	if (!nodeServer_->getNodePool()->find(id, infoNodePtr)) {
 		//no login conn,try to find from tmpPool
 		uint tmpId = TMP_ID_CONN(conn);
-		ConnNodePtr connNodePtr;
-		if (nodeServer_->getTempConnectPool()->find(tmpId, connNodePtr)) {
-			InfoNodePtr tmpPtr(
-					new InfoNode(connNodePtr));
-			infoNodePtr.swap(tmpPtr);
+		if (!nodeServer_->getTempNodePool()->find(tmpId, infoNodePtr)) {
+			LOG_ERROR<<conn->peerAddress().toIpPort()<<" ID:"<<ID_CONN(conn)<<" temp ID:"<<TMP_ID_CONN(conn)<<" Can't find InfoNode!";
 		}
 	}
 	return infoNodePtr;
@@ -174,7 +185,7 @@ bool MsgController::addObjectType(const std::string& objectTypeStr,
 		return false;
 	}
 	objectTypeMap_[objectTypeStr] = objectType;
-	LOG_INFO<<"Add "<<objectTypeStr<<" as Server dev Type success!";
+	LOG_INFO << "Add " << objectTypeStr << " as Server dev Type success!";
 	return true;
 }
 bool MsgController::getObjectType(const std::string& objectTypeStr,
@@ -184,7 +195,7 @@ bool MsgController::getObjectType(const std::string& objectTypeStr,
 		(*objectType) = it->second;
 		return true;
 	}
-	//if can't find objectTypeStr,try to set as TEMP_NODE_TYPE
+//if can't find objectTypeStr,try to set as TEMP_NODE_TYPE
 	it = objectTypeMap_.find(TEMP_NODE_TYPE);
 	if (it != objectTypeMap_.end()) {
 		(*objectType) = it->second;
@@ -193,4 +204,13 @@ bool MsgController::getObjectType(const std::string& objectTypeStr,
 }
 void MsgController::setTempNodeType(TempNodeType* tempNodeType) {
 	objectTypeMap_[TEMP_NODE_TYPE] = tempNodeType;
+}
+void MsgController::updateAliveTime(InfoNodePtr& infoNodePtr) {
+	if (infoNodePtr->getStatus() == NO_LOGIN_STATUS) {
+		uint tmpId = infoNodePtr->getTempId();
+		nodeServer_->getTempNodePool()->updateAliveId(tmpId);
+	} else {
+		uint id = infoNodePtr->getId();
+		nodeServer_->getNodePool()->updateAliveId(id);
+	}
 }

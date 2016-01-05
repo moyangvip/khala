@@ -8,7 +8,6 @@
 #include <khala/ConnID.h>
 #include <khala/NodeServer.h>
 #include <khala/NodeType.h>
-#include <khala/ParseKey.h>
 #include <muduo/base/Logging.h>
 
 using namespace khala;
@@ -70,20 +69,22 @@ bool TempNodeType::onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		return false;
 	if (!nodeType->onLoginCheckMsg(infoNodePtr, msg, time)) {
 		LOG_ERROR<< conn->peerAddress().toIpPort() << "tmp ID:"
-		<< TMP_ID_CONN(conn) << " login failure!";
+		<<infoNodePtr->getTempId()<< " login failure!";
 		return true;
 	}
+	//set id
 	uint id = infoNodePtr->getId();
 	if (id == DEFAULT_ID) {
-		LOG_ERROR<< conn->peerAddress().toIpPort() << " ID:" << id
-		<< " DO NOT SET DEFAULT ID AS KEY!";
-		nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
-		return false;
+		LOG_INFO << conn->peerAddress().toIpPort()
+				<< " ID will be set as tmp ID:" << infoNodePtr->getTempId();
+		id = infoNodePtr->getTempId();
+		infoNodePtr->setId(id);
 	}
 	if (!nodeServer_->getNodePool()->hasNode(id)) {
-		//the new id has not login
-		if (nodeServer_->getNodePool()->setNewConnNode(id, infoNodePtr)) {
-			nodeServer_->getTempConnectPool()->remove(TMP_ID_CONN(conn));
+		//the new id has not login,add to nodePool
+		if (nodeServer_->getNodePool()->setNewNode(id, infoNodePtr)) {
+			//add to nodePool success,remove from TempNodePool
+			nodeServer_->getTempNodePool()->remove(infoNodePtr->getTempId());
 			infoNodePtr->setStatus(LOGIN_STATUS);
 			LOG_INFO << conn->peerAddress().toIpPort() << " ID:" << id
 					<< " login success!";
@@ -92,13 +93,19 @@ bool TempNodeType::onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 			//loading err,can't set id,may other threading is login with the id
 			LOG_ERROR<< conn->peerAddress().toIpPort() << " ID:" << id
 			<< " login err!";
-			return nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
+			bool res = nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
+			//reset id as DEFAULT_ID
+			infoNodePtr->setId(DEFAULT_ID);
+			return res;
 		}
 	} else {
 		//the id has login
 		LOG_ERROR << conn->peerAddress().toIpPort() << " ID:" << id
 		<< " Has logined id!";
-		return nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
+		bool res = nodeType->onLoginFailureMsg(infoNodePtr, msg, time);
+		//reset id as DEFAULT_ID
+		infoNodePtr->setId(DEFAULT_ID);
+		return res;
 	}
 	return true;
 }
@@ -110,7 +117,7 @@ void TempNodeType::onLoginTypeCheck(InfoNodePtr& infoNodePtr,
 	ObjectType* nodeType = 0;
 	if (nodeTypeStr == TEMP_NODE_TYPE) {
 		LOG_ERROR<< conn->peerAddress().toIpPort() << " temp ID:"
-		<< TMP_ID_CONN(conn)
+		<< infoNodePtr->getTempId()
 		<< " can't set Node Type as TEMP_NODE_TYPE!";
 		nodeServer_->getMsgController().getObjectType(LOGIN_NODE_TYPE,
 				&nodeType);
@@ -119,23 +126,22 @@ void TempNodeType::onLoginTypeCheck(InfoNodePtr& infoNodePtr,
 			if (!nodeServer_->getMsgController().getObjectType(nodeTypeStr,
 							&nodeType)) {
 				LOG_ERROR << conn->peerAddress().toIpPort() << " temp ID:"
-				<< TMP_ID_CONN(conn) << " err Node Type:" << nodeTypeStr
+				<<infoNodePtr->getTempId()<< " err Node Type:" << nodeTypeStr
 				<< "!";
 				nodeServer_->getMsgController().getObjectType(LOGIN_NODE_TYPE,
 						&nodeType);
 			}
 		} else {
 			LOG_ERROR << conn->peerAddress().toIpPort() << " temp ID:"
-			<< TMP_ID_CONN(conn) << " err Node Type:" << nodeTypeStr
-			<< "!";
+			<<infoNodePtr->getTempId() << " No Set  Login Type!";
 			nodeServer_->getMsgController().getObjectType(LOGIN_NODE_TYPE,
 					&nodeType);
 		}
 	}
 	infoNodePtr->setNodeType(nodeType);
 	LOG_INFO << conn->peerAddress().toIpPort() << " temp ID:"
-			<< TMP_ID_CONN(conn) << " set as\"" << nodeType->getObjectTypeName()
-			<< "\" TYPE!";
+			<< infoNodePtr->getTempId() << " set as\""
+			<< nodeType->getObjectTypeName() << "\" TYPE!";
 }
 void TempNodeType::setRegisterMsg(RegisterHandler& handler) {
 	handler.setRegisterMsg(LOGIN_TYPE,
@@ -169,4 +175,19 @@ bool TempNodeType::onIsLoginMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	std::string sendStr = jwriter.write(res);
 	infoNodePtr->send(sendStr);
 	return true;
+}
+void TempNodeType::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = OVER_TIME;
+	res[DATA] = "err,connect overtime!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
+}
+void TempNodeType::onOverTime_(InfoNodePtr& infoNodePtr, Timestamp time) {
+	//do sth
+	this->onOverTime(infoNodePtr, time);
+	//try to remove from nodePool
+	nodeServer_->getTempNodePool()->remove(infoNodePtr->getTempId());
+	nodeServer_->getNodePool()->remove(infoNodePtr->getId());
 }

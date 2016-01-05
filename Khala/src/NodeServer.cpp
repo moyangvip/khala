@@ -14,33 +14,40 @@
 #include <muduo/base/Logging.h>
 using namespace khala;
 NodeServer::NodeServer(const InetAddress& listenAddr) :
-		server_(&loop_, listenAddr, "UsrServer"), idleAliveTime_(
-		DEFAULT_IDLE_ALIVE_TIME), checkIdleTime_(
+		server_(&loop_, listenAddr, "UsrServer"), checkIdleTime_(
 		DEFAULT_CHECK_IDLE_TIME), msgController_(this) {
-	tempConnectPool_.setIdleAliveTime(idleAliveTime_);
-	setTempNodeTypeInstance(TempNodeType::getInstance());
-	this->addNodeType(NodeType::getInstance());
+	//set default nodeType
+	setTempNodeType(TempNodeType::getInstance());
+	addNodeType(NodeType::getInstance());
+
+	//set default callback
 	server_.setConnectionCallback(
 			boost::bind(&NodeServer::onConnection, this, _1));
 	server_.setMessageCallback(
 			boost::bind(&NodeServer::onMessage, this, _1, _2, _3));
+	tempNodePool_.setOverTimeCallBack(boost::bind(&MsgController::onOverTime, &msgController_, _1,_2));
+	nodePool_.setOverTimeCallBack(boost::bind(&MsgController::onOverTime, &msgController_, _1,_2));
 }
 NodeServer::~NodeServer() {
 }
 void NodeServer::start(int usrIoThreadNum = 0) {
 	server_.setThreadNum(usrIoThreadNum);
-	if (idleAliveTime_ != 0) {
+	if(checkIdleTime_ > 0){
 		server_.getLoop()->runEvery(checkIdleTime_,
-				boost::bind(&NodeServer::onEveryTime, this));
+							boost::bind(&NodeServer::onEveryTime, this));
 	}
 	server_.start();
+	LOG_INFO<<"Khala will check node every "<<checkIdleTime_<<" seconds.";
+	LOG_INFO<<"Temp node have "<<tempNodePool_.getIdleAliveTime()<<" seconds alive time each correct msg.";
+	LOG_INFO<<"Login node have "<<nodePool_.getIdleAliveTime()<<" seconds alive time each correct msg.";
 	LOG_INFO << "Khala Server is started !enjoy~  :-)";
 	loop_.loop();
 }
 void NodeServer::onEveryTime() {
 	//LOG_INFO<<"this is everytime";
-	//everytime check overtime conn from tempConnectPool
-	tempConnectPool_.checkTempConnect();
+	//everytime check overtime conn from NodePool
+	tempNodePool_.checkAlive();
+	nodePool_.checkAlive();
 }
 void NodeServer::onConnection(const TcpConnectionPtr& conn) {
 	muduo::Timestamp time = muduo::Timestamp::now();
@@ -79,7 +86,7 @@ bool NodeServer::addNodeType(NodeType* nodeType) {
 	LOG_ERROR<<"err nodeType:"<<nodeType->getObjectTypeName()<<" has aready exist! you should set a unique TypeName!";
 	return false;
 }
-void NodeServer::setTempNodeTypeInstance(TempNodeType* tempNodeType) {
+void NodeServer::setTempNodeType(TempNodeType* tempNodeType) {
 	msgController_.setTempNodeType(tempNodeType);
 	tempNodeType->setNodeServer(this);
 	tempNodeType->setRegisterMsg_();
@@ -88,4 +95,23 @@ ObjectType* NodeServer::getObjectType(const std::string& type) {
 	ObjectType* objectType = 0;
 	msgController_.getObjectType(type, &objectType);
 	return objectType;
+}
+void NodeServer::setTempNodeIdleTime(int seconds){
+	if(seconds >=0){
+		tempNodePool_.setIdleAliveTime(seconds);
+	}
+}
+void NodeServer::setNodeIdleTime(int seconds){
+	if(seconds >=0){
+		nodePool_.setIdleAliveTime(seconds);
+	}
+}
+void NodeServer::setCheckTime(int seconds){
+	if(seconds >=0){
+		if(seconds == 0 ){
+			tempNodePool_.setIdleAliveTime(0);
+			nodePool_.setIdleAliveTime(0);
+		}
+		checkIdleTime_ = seconds;
+	}
 }

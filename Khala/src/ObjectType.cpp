@@ -6,7 +6,6 @@
  */
 #include <khala/NodeServer.h>
 #include <khala/ObjectType.h>
-#include <khala/ParseKey.h>
 using namespace khala;
 RegisterHandler::RegisterHandler(MsgHandlerMap& msgHandlerMap) :
 		msgHandlerMap_(msgHandlerMap) {
@@ -47,4 +46,7 @@ NodeManager* ObjectType::getNodeManager() {
 void ObjectType::setRegisterMsg_() {
 	RegisterHandler registerHandler(msgHandlerMap_);
 	setRegisterMsg(registerHandler);
+}
+void onOverTime_(InfoNodePtr& infoNodePtr,Timestamp time){
+
 }
