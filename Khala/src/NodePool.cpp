@@ -8,9 +8,11 @@
 #include <khala/NodePool.h>
 using namespace khala;
 
-NodePool::NodePool() :setIdleTime_(true){
-	aliveManager_.setOverTimeCallBack(boost::bind(&NodePool::overTimeNode, this, _1));
-	if(DEFAULT_IDLE_ALIVE_TIME == 0){
+NodePool::NodePool() :
+		setIdleTime_(true) {
+	aliveManager_.setOverTimeCallBack(
+			boost::bind(&NodePool::overTimeNode, this, _1));
+	if (DEFAULT_IDLE_ALIVE_TIME == 0) {
 		//turn off overtime check
 		setIdleTime_ = false;
 	}
@@ -34,26 +36,30 @@ bool NodePool::find(uint id, InfoNodePtr& infoNodePtr) {
 //locked,only one threading...
 bool NodePool::setNewNode(uint id, InfoNodePtr& connNodePtr) {
 	//if has old id,don't do anything and return false
-	muduo::MutexLockGuard lock(nodeMapLock_);
-	typename NewMap::iterator it = nodeMap_.find(id);
-	if (it != nodeMap_.end())
-		return false;
-	nodeMap_[id] = connNodePtr;
-	if(setIdleTime_){
+	{
+		muduo::MutexLockGuard lock(nodeMapLock_);
+		typename NewMap::iterator it = nodeMap_.find(id);
+		if (it != nodeMap_.end())
+			return false;
+		nodeMap_[id] = connNodePtr;
+	}
+	if (setIdleTime_) {
 		//try to add to alive
-			aliveManager_.push_front(id);
+		aliveManager_.push_front(id);
 	}
 	return true;
 }
 void NodePool::remove(uint id) {
-	muduo::MutexLockGuard lock(nodeMapLock_);
-	typename NewMap::iterator it = nodeMap_.find(id);
-	if (it == nodeMap_.end())
-		return;
-	nodeMap_.erase(it);
-	if(setIdleTime_){
+	{
+		muduo::MutexLockGuard lock(nodeMapLock_);
+		typename NewMap::iterator it = nodeMap_.find(id);
+		if (it == nodeMap_.end())
+			return;
+		nodeMap_.erase(it);
+	}
+	if (setIdleTime_) {
 		//try to remove from alive
-			aliveManager_.remove(id);
+		aliveManager_.remove(id);
 	}
 }
 std::vector<uint> NodePool::getNodeByType(const std::string& type) {
@@ -76,24 +82,24 @@ void NodePool::checkAlive() {
 	aliveManager_.checkAlive();
 }
 void NodePool::setIdleAliveTime(int idleAliveTime) {
-	if(idleAliveTime == 0){
+	if (idleAliveTime == 0) {
 		//turn off overtime check
 		setIdleTime_ = false;
-	}else{
+	} else {
 		setIdleTime_ = true;
 	}
 	aliveManager_.setIdleAliveTime(idleAliveTime);
 }
-int NodePool::getIdleAliveTime(){
+int NodePool::getIdleAliveTime() {
 	return aliveManager_.getIdleAliveTime();
 }
 void NodePool::setOverTimeCallBack(const OverTimeCallback2& cb) {
 	cb_ = cb;
 }
-void NodePool::overTimeNode(uint id){
+void NodePool::overTimeNode(uint id) {
 	InfoNodePtr infoNodePtr;
-	if(find(id,infoNodePtr)){
+	if (find(id, infoNodePtr)) {
 		//invoke NodePool's callback func
-		cb_(infoNodePtr,Timestamp::now());
+		cb_(infoNodePtr, Timestamp::now());
 	}
 }

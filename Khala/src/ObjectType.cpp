@@ -47,6 +47,42 @@ void ObjectType::setRegisterMsg_() {
 	RegisterHandler registerHandler(msgHandlerMap_);
 	setRegisterMsg(registerHandler);
 }
-void onOverTime_(InfoNodePtr& infoNodePtr,Timestamp time){
-
+/*
+ * if receive any no register type msg with this nodeType,will invoke this function
+ * */
+void ObjectType::onErrTypeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = ERR_TYPE;
+	res[DATA] = "err type req!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
+}
+/*
+ * if  any msg handler return false,will invoke this function
+ * */
+void ObjectType::onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = ERR_RUN;
+	res[DATA] = "err,running err!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
+}
+void ObjectType::onOverTime_(InfoNodePtr& infoNodePtr,Timestamp time){
+	//do sth
+	this->onOverTime(infoNodePtr, time);
+	//try to remove from nodePool
+	nodeServer_->getTempNodePool()->remove(infoNodePtr->getTempId());
+	nodeServer_->getNodePool()->remove(infoNodePtr->getId());
+}
+void ObjectType::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
+	Json::Value res;
+	res[MSG_TYPE] = OVER_TIME;
+	res[DATA] = "err,connect overtime!";
+	Json::FastWriter jwriter;
+	std::string sendStr = jwriter.write(res);
+	infoNodePtr->send(sendStr);
 }

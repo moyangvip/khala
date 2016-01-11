@@ -9,6 +9,7 @@
 #include <khala/HeadCode.h>
 #include <khala/ParseKey.h>
 #include <khala/NodeType.h>
+#include <khala/TempNodeType.h>
 #include <json/json.h>
 #include <boost/bind.hpp>
 #include <muduo/base/Logging.h>

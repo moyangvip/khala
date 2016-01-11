@@ -47,20 +47,22 @@ public:
 	 * if receive any no register type msg with this nodeType,will invoke this function
 	 * */
 	virtual void onErrTypeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-			Timestamp time) =0;
+			Timestamp time) ;
 	/*
 	 * if  any msg handler return false,will invoke this function
 	 * */
 	virtual void onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-			Timestamp time) =0;
+			Timestamp time);
 	/*
 	 * if node overTime,will invoke this function
 	 * the node connection will be disconnect soon
 	 * */
-	virtual void onOverTime(InfoNodePtr& infoNodePtr,Timestamp time) =0;
+	virtual void onOverTime(InfoNodePtr& infoNodePtr,Timestamp time);
+public:
 	friend class NodeServer;
 	friend class NodeType;
 	friend class TempNodeType;
+	friend class  MsgController;
 protected:
 	/*
 	 * you can get NodeManager to manager node
@@ -73,6 +75,7 @@ protected:
 private:
 	void setRegisterMsg_();
 	void setNodeServer(NodeServer* nodeServer);
+	void onOverTime_(InfoNodePtr& infoNodePtr, Timestamp time);
 private:
 	MsgHandlerMap msgHandlerMap_;
 	NodeManager nodeManager_;

@@ -22,21 +22,6 @@ public:
 	static TempNodeType* getInstance();
 
 	virtual const std::string& getObjectTypeName();
-	/*
-	 * if receive any no register type msg with this nodeType,will invoke this function
-	 * */
-	virtual void onErrTypeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-			Timestamp time);
-	/*
-	 * if  any msg handler return false,will invoke this function
-	 * */
-	virtual void onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-			Timestamp time);
-	/*
-	 * if node overTime,will invoke this function
-	 * the node connection will be disconnect soon
-	 * */
-	virtual void onOverTime(InfoNodePtr& infoNodePtr, Timestamp time);
 	virtual void setRegisterMsg(RegisterHandler& handler);
 	/*
 	 * you can get node type,you can override it
@@ -48,12 +33,10 @@ public:
 	 * */
 	virtual bool onIsLoginMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 			Timestamp time);
-	friend class  MsgController;
 private:
 	bool onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 			Timestamp time);
 	void onLoginTypeCheck(InfoNodePtr& infoNodePtr, Json::Value& msg);
-	void onOverTime_(InfoNodePtr& infoNodePtr, Timestamp time);
 };
 }
 

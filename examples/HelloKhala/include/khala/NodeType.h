@@ -7,9 +7,9 @@
 
 #ifndef NODETYPE_H_
 #define NODETYPE_H_
-#include <khala/TempNodeType.h>
+#include <khala/ObjectType.h>
 namespace khala {
-class NodeType: public TempNodeType {
+class NodeType: public ObjectType {
 
 public:
 	NodeType();

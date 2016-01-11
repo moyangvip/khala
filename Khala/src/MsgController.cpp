@@ -7,6 +7,7 @@
 #include <khala/MsgController.h>
 #include <khala/NodeServer.h>
 #include <khala/NodeType.h>
+#include <khala/TempNodeType.h>
 #include <khala/ParseKey.h>
 #include <muduo/base/Logging.h>
 using namespace khala;
@@ -153,7 +154,7 @@ void MsgController::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
 	getObjectType(infoNodePtr->getNodeType(), &objectType);
 	//run in conn's thread loop
 	conn->getLoop()->runInLoop(
-			boost::bind(&TempNodeType::onOverTime_, (TempNodeType*)objectType, infoNodePtr,
+			boost::bind(&ObjectType::onOverTime_,objectType, infoNodePtr,
 					time));
 }
 bool MsgController::isLogin(const TcpConnectionPtr& conn, Json::Value& msg,

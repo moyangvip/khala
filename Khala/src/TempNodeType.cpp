@@ -24,30 +24,6 @@ const std::string& TempNodeType::getObjectTypeName() {
 	static std::string typeStr(TEMP_NODE_TYPE);
 	return typeStr;
 }
-/*
- * if receive any no register type msg with this nodeType,will invoke this function
- * */
-void TempNodeType::onErrTypeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-		Timestamp time) {
-	Json::Value res;
-	res[MSG_TYPE] = ERR_TYPE;
-	res[DATA] = "err type req!";
-	Json::FastWriter jwriter;
-	std::string sendStr = jwriter.write(res);
-	infoNodePtr->send(sendStr);
-}
-/*
- * if  any msg handler return false,will invoke this function
- * */
-void TempNodeType::onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
-		Timestamp time) {
-	Json::Value res;
-	res[MSG_TYPE] = ERR_RUN;
-	res[DATA] = "err,running err!";
-	Json::FastWriter jwriter;
-	std::string sendStr = jwriter.write(res);
-	infoNodePtr->send(sendStr);
-}
 bool TempNodeType::onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
 	muduo::net::TcpConnectionPtr& conn = infoNodePtr->getConn();
@@ -176,18 +152,4 @@ bool TempNodeType::onIsLoginMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	infoNodePtr->send(sendStr);
 	return true;
 }
-void TempNodeType::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
-	Json::Value res;
-	res[MSG_TYPE] = OVER_TIME;
-	res[DATA] = "err,connect overtime!";
-	Json::FastWriter jwriter;
-	std::string sendStr = jwriter.write(res);
-	infoNodePtr->send(sendStr);
-}
-void TempNodeType::onOverTime_(InfoNodePtr& infoNodePtr, Timestamp time) {
-	//do sth
-	this->onOverTime(infoNodePtr, time);
-	//try to remove from nodePool
-	nodeServer_->getTempNodePool()->remove(infoNodePtr->getTempId());
-	nodeServer_->getNodePool()->remove(infoNodePtr->getId());
-}
+
