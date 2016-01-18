@@ -6,6 +6,7 @@
  */
 #include <khala/NodeServer.h>
 #include <khala/ObjectType.h>
+#include <muduo/base/Logging.h>
 using namespace khala;
 RegisterHandler::RegisterHandler(MsgHandlerMap& msgHandlerMap) :
 		msgHandlerMap_(msgHandlerMap) {
@@ -71,12 +72,13 @@ void ObjectType::onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	std::string sendStr = jwriter.write(res);
 	infoNodePtr->send(sendStr);
 }
-void ObjectType::onOverTime_(InfoNodePtr& infoNodePtr,Timestamp time){
+void ObjectType::onOverTime_(InfoNodePtr& infoNodePtr, Timestamp time) {
 	//do sth
 	this->onOverTime(infoNodePtr, time);
 	//try to remove from nodePool
 	nodeServer_->getTempNodePool()->remove(infoNodePtr->getTempId());
-	nodeServer_->getNodePool()->remove(infoNodePtr->getId());
+	nodeServer_->getNodePool()->forceRemove(infoNodePtr->getId(),
+			infoNodePtr->getNodeType());
 }
 void ObjectType::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
 	Json::Value res;

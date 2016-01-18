@@ -55,8 +55,6 @@ private:
 private:
 	//conn's life cycle is bind with the InfoNode
 		TcpConnectionPtr conn_;
-	//default TempNodeType Instance as NodeType
-	std::string objectType_;
 	LoginStatus loginStatus_;
 	ConnIDPtr connIDPtr_;
 	/*

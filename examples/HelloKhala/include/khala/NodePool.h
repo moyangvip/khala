@@ -19,11 +19,17 @@ public:
 	NodePool();
 	virtual ~NodePool();
 	bool hasNode(uint id);
+	bool hasNode(uint id,const std::string& type);
 	bool find(uint id, InfoNodePtr& infoNodePtr);
+	bool find(uint id, InfoNodePtr& infoNodePtr,const std::string& type);
 	//locked,only one threading...
-	bool setNewNode(uint id, InfoNodePtr& connNodePtr);
-	void remove(uint id);
-
+	bool setNewNode(uint id, InfoNodePtr& infoNodePtr);
+	bool remove(uint id);
+	bool remove(uint id,const std::string& type);
+	/*
+	 * try to remove use type,if false,check from all type
+	 * */
+	void forceRemove(uint id, const std::string& type);
 	//this is about nodeManager
 	/*
 	 * get node ids which have the same  class and derived class
@@ -49,29 +55,37 @@ public:
 private:
 	//this is AliveManager's overTime callback func
 	void overTimeNode(uint id);
+	bool hasNodeUnlock(uint id);
 private:
-	typedef boost::unordered_map<uint, InfoNodePtr> NewMap;
-	NewMap nodeMap_;
 	mutable muduo::MutexLock nodeMapLock_;
 	AliveManager aliveManager_;
 	OverTimeCallback2 cb_;
 	//is set over time check?
 	bool setIdleTime_;
+
+	typedef boost::unordered_map<uint, InfoNodePtr> NewIDMap;
+	typedef boost::shared_ptr<NewIDMap> NewIDMapPtr;
+	typedef boost::unordered_map<std::string, NewIDMapPtr> NewTypeMap;
+	NewTypeMap nodeCache_;
+
 };
 template<class Type>
 std::vector<uint> NodePool::getAllNodeByType(Type* objectType,
 		MsgController* msgController) {
-	muduo::MutexLockGuard lock(nodeMapLock_);
 	std::vector<uint> result;
-	typename NewMap::iterator it = nodeMap_.begin();
-	while (it != nodeMap_.end()) {
+	muduo::MutexLockGuard lock(nodeMapLock_);
+	typename NewTypeMap::iterator it1 = nodeCache_.begin();
+	for (; it1 != nodeCache_.end(); ++it1) {
 		ObjectType* myObjectType = 0;
-		msgController->getObjectType(it->second->getNodeType(), &myObjectType);
+		msgController->getObjectType(it1->first, &myObjectType);
 		Type* p = dynamic_cast<Type*>(myObjectType);
 		if (p != 0) {
-			result.push_back(it->first);
+			//add all the node id of the type
+			typename NewIDMap::iterator it2 = (it1->second)->begin();
+			for (; it2 != (it1->second)->end(); ++it2) {
+				result.push_back(it2->first);
+			}
 		}
-		++it;
 	}
 	return result;
 }

@@ -6,6 +6,7 @@
  */
 
 #include <khala/NodePool.h>
+#include <muduo/base/Logging.h>
 using namespace khala;
 
 NodePool::NodePool() :
@@ -22,55 +23,151 @@ NodePool::~NodePool() {
 }
 bool NodePool::hasNode(uint id) {
 	muduo::MutexLockGuard lock(nodeMapLock_);
-	typename NewMap::iterator it = nodeMap_.find(id);
-	return it != nodeMap_.end();
+	return hasNodeUnlock(id);
+}
+bool NodePool::hasNode(uint id, const std::string& type) {
+	muduo::MutexLockGuard lock(nodeMapLock_);
+	typename NewTypeMap::iterator it1 = nodeCache_.find(type);
+	if (it1 == nodeCache_.end()) {
+		return false;
+	}
+	typename NewIDMap::iterator it2 = (it1->second)->find(id);
+	if (it2 != (it1->second)->end()) {
+		return true;
+	}
+	return false;
+}
+bool NodePool::hasNodeUnlock(uint id) {
+	typename NewTypeMap::iterator it1 = nodeCache_.begin();
+	for (; it1 != nodeCache_.end(); ++it1) {
+		typename NewIDMap::iterator it2 = (it1->second)->find(id);
+		if (it2 != (it1->second)->end()) {
+			return true;
+		}
+	}
+	return false;
 }
 bool NodePool::find(uint id, InfoNodePtr& infoNodePtr) {
 	muduo::MutexLockGuard lock(nodeMapLock_);
-	typename NewMap::iterator it = nodeMap_.find(id);
-	if (it == nodeMap_.end())
+	typename NewTypeMap::iterator it1 = nodeCache_.begin();
+	for (; it1 != nodeCache_.end(); ++it1) {
+		typename NewIDMap::iterator it2 = (it1->second)->find(id);
+		if (it2 != (it1->second)->end()) {
+			infoNodePtr = it2->second;
+			return true;
+		}
+	}
+	return false;
+}
+bool NodePool::find(uint id, InfoNodePtr& infoNodePtr,
+		const std::string& type) {
+	muduo::MutexLockGuard lock(nodeMapLock_);
+	typename NewTypeMap::iterator it1 = nodeCache_.find(type);
+	if (it1 == nodeCache_.end()) {
 		return false;
-	infoNodePtr = it->second;
-	return true;
+	}
+	typename NewIDMap::iterator it2 = (it1->second)->find(id);
+	if (it2 != (it1->second)->end()) {
+		infoNodePtr = it2->second;
+		return true;
+	}
+	return false;
 }
 //locked,only one threading...
-bool NodePool::setNewNode(uint id, InfoNodePtr& connNodePtr) {
-	//if has old id,don't do anything and return false
+bool NodePool::setNewNode(uint id, InfoNodePtr& infoNodePtr) {
 	{
 		muduo::MutexLockGuard lock(nodeMapLock_);
-		typename NewMap::iterator it = nodeMap_.find(id);
-		if (it != nodeMap_.end())
+		//if has old id,don't do anything and return false
+		if (hasNodeUnlock(id))
 			return false;
-		nodeMap_[id] = connNodePtr;
-	}
+		std::string type = infoNodePtr->getNodeType();
+		if (nodeCache_.find(type) == nodeCache_.end()) {
+			NewIDMapPtr newIDMapPtr(new NewIDMap);
+			nodeCache_[type] = newIDMapPtr;
+			LOG_INFO << "add new  type node Pool:" << type << " Type!";
+		}
+		(*(nodeCache_[type]))[id] = infoNodePtr;
+	} //this is end of nodeMapLock_
 	if (setIdleTime_) {
 		//try to add to alive
 		aliveManager_.push_front(id);
 	}
 	return true;
 }
-void NodePool::remove(uint id) {
+bool NodePool::remove(uint id, const std::string& type) {
+	bool res = false;
 	{
 		muduo::MutexLockGuard lock(nodeMapLock_);
-		typename NewMap::iterator it = nodeMap_.find(id);
-		if (it == nodeMap_.end())
-			return;
-		nodeMap_.erase(it);
+		typename NewTypeMap::iterator it1 = nodeCache_.find(type);
+		if (it1 == nodeCache_.end()) {
+			return false;
+		}
+		typename NewIDMap::iterator it2 = (it1->second)->find(id);
+		if (it2 != (it1->second)->end()) {
+			res = true;
+			//delete the node
+			(it1->second)->erase(it2);
+			if ((it1->second)->empty()) {
+				//if the NewIDMapPtr is empty,delete it
+				//be careful we will delete the iterator,we will break the loop,so it is safe
+				nodeCache_.erase(it1);
+				LOG_INFO << type << " node Pool is empty! is deleted!";
+			}
+		}
 	}
-	if (setIdleTime_) {
+	if (setIdleTime_ && res == true) {
 		//try to remove from alive
 		aliveManager_.remove(id);
 	}
+	return res;
+}
+void NodePool::forceRemove(uint id, const std::string& type) {
+	//try to remove from this type nodePool,first try effective way
+	if (remove(id, type)) {
+		return;
+	}
+	LOG_ERROR<< " ID:" << id<< " can't delete from node Pool as "<< type << " Type!";
+	//if false,try normal way
+	remove(id);
+}
+bool NodePool::remove(uint id) {
+	bool res = false;
+	{
+		muduo::MutexLockGuard lock(nodeMapLock_);
+		typename NewTypeMap::iterator it1 = nodeCache_.begin();
+		for (; it1 != nodeCache_.end(); ++it1) {
+			typename NewIDMap::iterator it2 = (it1->second)->find(id);
+			if (it2 != (it1->second)->end()) {
+				res = true;
+				//delete the node
+				(it1->second)->erase(it2);
+				if ((it1->second)->empty()) {
+					std::string type = it1->first;
+					//if the NewIDMapPtr is empty,delete it
+					//be careful we will delete the iterator,we will break the loop,so it is safe
+					nodeCache_.erase(it1);
+					LOG_INFO << type << " node Pool is empty! is deleted!";
+				}
+				//we have delete,break the loop
+				break;
+			}
+		}
+	} //this is end of nodeMapLock_
+	if (setIdleTime_ && res == true) {
+		//try to remove from alive
+		aliveManager_.remove(id);
+	}
+	return res;
 }
 std::vector<uint> NodePool::getNodeByType(const std::string& type) {
 	std::vector<uint> result;
 	muduo::MutexLockGuard lock(nodeMapLock_);
-	typename NewMap::iterator it = nodeMap_.begin();
-	while (it != nodeMap_.end()) {
-		if (it->second->getNodeType() == type) {
-			result.push_back(it->first);
+	typename NewTypeMap::iterator it1 = nodeCache_.find(type);
+	if (it1 != nodeCache_.end()) {
+		typename NewIDMap::iterator it2 = (it1->second)->begin();
+		for (; it2 != (it1->second)->end(); ++it2) {
+			result.push_back(it2->first);
 		}
-		++it;
 	}
 	return result;
 }

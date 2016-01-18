@@ -118,7 +118,7 @@ void MsgController::onAbnormalExit(const TcpConnectionPtr& conn,
 	ObjectType* objectType = 0;
 	getObjectType(infoNodePtr->getNodeType(), &objectType);
 	((NodeType*) objectType)->releaseConnNode(infoNodePtr, time);
-	nodeServer_->getNodePool()->remove(id);
+	nodeServer_->getNodePool()->forceRemove(id, infoNodePtr->getNodeType());
 }
 void MsgController::onErrTypeMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		Timestamp time) {
@@ -154,27 +154,28 @@ void MsgController::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
 	getObjectType(infoNodePtr->getNodeType(), &objectType);
 	//run in conn's thread loop
 	conn->getLoop()->runInLoop(
-			boost::bind(&ObjectType::onOverTime_,objectType, infoNodePtr,
+			boost::bind(&ObjectType::onOverTime_, objectType, infoNodePtr,
 					time));
-}
-bool MsgController::isLogin(const TcpConnectionPtr& conn, Json::Value& msg,
-		Timestamp time) {
-	uint id = ID_CONN(conn);
-	if (!nodeServer_->getNodePool()->hasNode(id)) {
-		LOG_ERROR<<conn->peerAddress().toIpPort()<<" temp ID:"<<TMP_ID_CONN(conn)<<" No Login Type REQ!";
-		return false;
-	}
-	return true;
 }
 InfoNodePtr MsgController::getInfoNode(const TcpConnectionPtr& conn) {
 	uint id = ID_CONN(conn);
 	InfoNodePtr infoNodePtr;
-	if (!nodeServer_->getNodePool()->find(id, infoNodePtr)) {
-		//no login conn,try to find from tmpPool
+	std::string type = TYPE_CONN(conn);
+	if (type == TEMP_NODE_TYPE || type == "") {
+		//try to find from tmpPool
 		uint tmpId = TMP_ID_CONN(conn);
 		if (!nodeServer_->getTempNodePool()->find(tmpId, infoNodePtr)) {
 			LOG_ERROR<<conn->peerAddress().toIpPort()<<" ID:"<<ID_CONN(conn)<<" temp ID:"<<TMP_ID_CONN(conn)<<" Can't find InfoNode!";
 		}
+	}else{
+		//first try to find from this type node pool
+		if (!nodeServer_->getNodePool()->find(id, infoNodePtr, type)) {
+				//no login conn,try to find from tmpPool
+				uint tmpId = TMP_ID_CONN(conn);
+				if (!nodeServer_->getTempNodePool()->find(tmpId, infoNodePtr)) {
+					LOG_ERROR<<conn->peerAddress().toIpPort()<<" ID:"<<ID_CONN(conn)<<" temp ID:"<<TMP_ID_CONN(conn)<<" Can't find InfoNode!";
+				}
+			}
 	}
 	return infoNodePtr;
 }

@@ -12,11 +12,12 @@
 #include <muduo/base/Logging.h>
 using namespace khala;
 InfoNode::InfoNode(const TcpConnectionPtr& conn) :
-		conn_(conn), objectType_(TEMP_NODE_TYPE), loginStatus_(NO_LOGIN_STATUS), connIDPtr_(
-				new ConnID()) {
+		conn_(conn), loginStatus_(NO_LOGIN_STATUS), connIDPtr_(new ConnID()) {
 	conn_->setContext((ConnIDPtr*) &connIDPtr_);
 	//set a only key as temp id
 	setTempId(RandomOnlyID::getInstance().getOnlyID());
+	//default TempNodeType Instance as NodeType
+	connIDPtr_->setNodeType(TEMP_NODE_TYPE);
 }
 InfoNode::~InfoNode() {
 	if (loginStatus_ == NO_LOGIN_STATUS) {
@@ -35,7 +36,7 @@ InfoNode::~InfoNode() {
 	conn_->forceClose();
 }
 void InfoNode::setNodeType(ObjectType* objectType) {
-	objectType_ = objectType->getObjectTypeName();
+	connIDPtr_->setNodeType(objectType->getObjectTypeName());
 }
 TcpConnectionPtr& InfoNode::getConn() {
 	return conn_;
@@ -56,7 +57,7 @@ void InfoNode::setTempId(uint id) {
 	connIDPtr_->setTmpId(id);
 }
 const std::string& InfoNode::getNodeType() const {
-	return objectType_;
+	return connIDPtr_->getNodeType();
 }
 
 void InfoNode::send(const std::string& msg, bool addHead) {

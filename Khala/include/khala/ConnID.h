@@ -20,10 +20,12 @@ public:
 	uint getTmpId() const;
 
 	void setTmpId(uint tmpId);
-
+	const std::string& getNodeType() const;
+	void setNodeType(const std::string& objectType);
 private:
 	uint tmpId_;
 	uint id_;
+	std::string objectType_;
 };
 typedef boost::shared_ptr<ConnID> ConnIDPtr;
 inline void SET_TMP_ID(const TcpConnectionPtr& conn, uint id) {
@@ -52,6 +54,13 @@ inline uint ID_CONN(const muduo::net::TcpConnectionPtr& conn) {
 		return (*p)->getId();
 	}
 	return DEFAULT_ID;
+}
+inline std::string TYPE_CONN(const muduo::net::TcpConnectionPtr& conn) {
+	ConnIDPtr* p = boost::any_cast<ConnIDPtr*>(conn->getContext());
+	if (p != 0) {
+		return (*p)->getNodeType();
+	}
+	return "";;
 }
 }
 

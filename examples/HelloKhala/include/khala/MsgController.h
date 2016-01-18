@@ -41,8 +41,6 @@ private:
 			Json::Value& msg, Timestamp time);
 	void onAbnormalExit(const TcpConnectionPtr& conn,
 			InfoNodePtr& infoNodePtr, Timestamp time);
-	bool isLogin(const TcpConnectionPtr& conn, Json::Value& msg,
-			Timestamp time);
 	InfoNodePtr getInfoNode(const TcpConnectionPtr& conn);
 	void updateAliveTime(InfoNodePtr& infoNodePtr);
 private:

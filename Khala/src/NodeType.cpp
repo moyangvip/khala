@@ -17,7 +17,7 @@ bool NodeType::onLogoutMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 		return false;
 	}
 	releaseConnNode(infoNodePtr, time);
-	nodeServer_->getNodePool()->remove(id);
+	nodeServer_->getNodePool()->forceRemove(id, infoNodePtr->getNodeType());
 	infoNodePtr->setStatus(NO_LOGIN_STATUS);
 	LOG_INFO << conn->peerAddress().toIpPort() << " ID:" << ID_CONN(conn)
 			<< " logout success!";

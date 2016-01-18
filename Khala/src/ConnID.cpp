@@ -24,3 +24,9 @@ uint ConnID::getTmpId() const {
 void ConnID::setTmpId(uint tmpId) {
 	this->tmpId_ = tmpId;
 }
+const std::string& ConnID::getNodeType() const{
+	return objectType_;
+}
+void ConnID::setNodeType(const std::string& objectType){
+	this->objectType_ = objectType;
+}

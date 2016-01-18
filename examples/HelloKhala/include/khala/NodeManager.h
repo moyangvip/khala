@@ -18,7 +18,12 @@ public:
 			nodeServer_(0) {
 	}
 	bool hasNode(uint id);
+	/*
+	 * will find the node only from the type node
+	 * */
+	bool hasNode(uint id,const std::string& type);
 	bool find(uint id, InfoNodePtr& infoNodePtr);
+	bool find(uint id, InfoNodePtr& infoNodePtr,const std::string& type);
 	/*
 	 * get node ids which only have  the same  class
 	 * */
