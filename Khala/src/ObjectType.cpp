@@ -72,14 +72,6 @@ void ObjectType::onErrRunMessage(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	std::string sendStr = jwriter.write(res);
 	infoNodePtr->send(sendStr);
 }
-void ObjectType::onOverTime_(InfoNodePtr& infoNodePtr, Timestamp time) {
-	//do sth
-	this->onOverTime(infoNodePtr, time);
-	//try to remove from nodePool
-	nodeServer_->getTempNodePool()->remove(infoNodePtr->getTempId());
-	nodeServer_->getNodePool()->forceRemove(infoNodePtr->getId(),
-			infoNodePtr->getNodeType());
-}
 void ObjectType::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
 	Json::Value res;
 	res[MSG_TYPE] = OVER_TIME;

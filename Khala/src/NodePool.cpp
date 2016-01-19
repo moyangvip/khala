@@ -114,7 +114,7 @@ bool NodePool::remove(uint id, const std::string& type) {
 				LOG_INFO << type << " node Pool is empty! is deleted!";
 			}
 		}
-	}
+	}//this is end of nodeMapLock_
 	if (setIdleTime_ && res == true) {
 		//try to remove from alive
 		aliveManager_.remove(id);

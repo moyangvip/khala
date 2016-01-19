@@ -75,7 +75,6 @@ protected:
 private:
 	void setRegisterMsg_();
 	void setNodeServer(NodeServer* nodeServer);
-	void onOverTime_(InfoNodePtr& infoNodePtr, Timestamp time);
 private:
 	MsgHandlerMap msgHandlerMap_;
 	NodeManager nodeManager_;

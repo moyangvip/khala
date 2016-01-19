@@ -154,8 +154,12 @@ void MsgController::onOverTime(InfoNodePtr& infoNodePtr, Timestamp time) {
 	getObjectType(infoNodePtr->getNodeType(), &objectType);
 	//run in conn's thread loop
 	conn->getLoop()->runInLoop(
-			boost::bind(&ObjectType::onOverTime_, objectType, infoNodePtr,
+			boost::bind(&ObjectType::onOverTime, objectType, infoNodePtr,
 					time));
+	//try to remove from nodePool
+	nodeServer_->getTempNodePool()->remove(infoNodePtr->getTempId());
+	nodeServer_->getNodePool()->forceRemove(infoNodePtr->getId(),
+			infoNodePtr->getNodeType());
 }
 InfoNodePtr MsgController::getInfoNode(const TcpConnectionPtr& conn) {
 	uint id = ID_CONN(conn);
@@ -167,15 +171,15 @@ InfoNodePtr MsgController::getInfoNode(const TcpConnectionPtr& conn) {
 		if (!nodeServer_->getTempNodePool()->find(tmpId, infoNodePtr)) {
 			LOG_ERROR<<conn->peerAddress().toIpPort()<<" ID:"<<ID_CONN(conn)<<" temp ID:"<<TMP_ID_CONN(conn)<<" Can't find InfoNode!";
 		}
-	}else{
+	} else {
 		//first try to find from this type node pool
 		if (!nodeServer_->getNodePool()->find(id, infoNodePtr, type)) {
-				//no login conn,try to find from tmpPool
-				uint tmpId = TMP_ID_CONN(conn);
-				if (!nodeServer_->getTempNodePool()->find(tmpId, infoNodePtr)) {
-					LOG_ERROR<<conn->peerAddress().toIpPort()<<" ID:"<<ID_CONN(conn)<<" temp ID:"<<TMP_ID_CONN(conn)<<" Can't find InfoNode!";
-				}
+			//no login conn,try to find from tmpPool
+			uint tmpId = TMP_ID_CONN(conn);
+			if (!nodeServer_->getTempNodePool()->find(tmpId, infoNodePtr)) {
+				LOG_ERROR<<conn->peerAddress().toIpPort()<<" ID:"<<ID_CONN(conn)<<" temp ID:"<<TMP_ID_CONN(conn)<<" Can't find InfoNode!";
 			}
+		}
 	}
 	return infoNodePtr;
 }

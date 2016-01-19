@@ -14,13 +14,13 @@ AliveManager::AliveManager(int idleAliveTime) :
 
 AliveManager::~AliveManager() {
 }
-void AliveManager::setOverTimeCallBack(const OverTimeCallback1& cb){
+void AliveManager::setOverTimeCallBack(const OverTimeCallback1& cb) {
 	cb_ = cb;
 }
-void AliveManager::setIdleAliveTime(int idleAliveTime){
+void AliveManager::setIdleAliveTime(int idleAliveTime) {
 	idleAliveTime_ = idleAliveTime;
 }
-int AliveManager::getIdleAliveTime(){
+int AliveManager::getIdleAliveTime() {
 	return idleAliveTime_;
 }
 bool AliveManager::push_front(uint id) {
@@ -50,21 +50,29 @@ void AliveManager::updateAliveId(uint id) {
 	aliveIdMap_.updateKey(id);
 }
 void AliveManager::checkAlive() {
-	muduo::MutexLockGuard lock(aliveLock_);
-	if(idleAliveTime_ ==  0){
-		return ;
+	if (idleAliveTime_ == 0) {
+		return;
 	}
-	while (aliveIdMap_.size() > 0) {
-		AliveIDPtr p = aliveIdMap_.back();
-		if (p == 0)
-			break;
-		if (addTime(p->time_, idleAliveTime_) < muduo::Timestamp::now()) {
-			//overtime callback
-			cb_(p->id_);
-			aliveIdMap_.pop_back();
-		} else {
-			//the last don't overtime,so all is ok
-			break;
+	std::vector<uint> v;
+	{
+		muduo::MutexLockGuard lock(aliveLock_);
+		while (aliveIdMap_.size() > 0) {
+			AliveIDPtr p = aliveIdMap_.back();
+			if (p == 0)
+				break;
+			if (addTime(p->time_, idleAliveTime_) < muduo::Timestamp::now()) {
+				//record the overtime ids
+				v.push_back(p->id_);
+				aliveIdMap_.pop_back();
+			} else {
+				//the last don't overtime,so all is ok
+				break;
+			}
 		}
+	} //this is end of aliveLock_
+	std::vector<uint>::iterator it = v.begin();
+	for (; it != v.end(); ++it) {
+		//invoke overtime callback
+		cb_(*it);
 	}
 }
