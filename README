@@ -20,7 +20,7 @@ moyangvip@163.com
   $ sudo apt-get install libboost-dev libboost-test-dev
 
 
-4、Khala同时依赖于muduo（https://github.com/chenshuo/muduo）和json（jsoncpp-src-0.5.0），示例工程中khala/examples/libs/目录中已经包含其静态库。
+4、Khala同时依赖于muduo（https://github.com/chenshuo/muduo）和json（jsoncpp-src-0.5.0），示例工程中/khala/examples/HelloKhala/libs/目录中已经包含其静态库。
 
 
 5、编译方法：
