@@ -7,6 +7,7 @@
 
 #include "MyManageType.h"
 #include "MyParseKey.h"
+#include <sstream>
 MyManageType::MyManageType() {
 
 
