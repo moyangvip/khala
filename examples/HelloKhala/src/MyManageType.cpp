@@ -8,12 +8,12 @@
 #include "MyManageType.h"
 #include "MyParseKey.h"
 MyManageType::MyManageType() {
-	// TODO Auto-generated constructor stub
+
 
 }
 
 MyManageType::~MyManageType() {
-	// TODO Auto-generated destructor stub
+
 }
 const std::string& MyManageType::getObjectTypeName() {
 	static std::string typeStr(MY_MANAGE_TYPE);

@@ -29,3 +29,5 @@
 
 Debug/
 Release/
+include/
+libs/libKhala.a

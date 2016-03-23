@@ -9,6 +9,7 @@
 #define USRINFO_H_
 #include  <set>
 #include <vector>
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 class UsrInfo {

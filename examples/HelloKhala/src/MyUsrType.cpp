@@ -11,12 +11,12 @@
 #include <sstream>
 
 MyUsrType::MyUsrType() {
-	// TODO Auto-generated constructor stub
+
 
 }
 
 MyUsrType::~MyUsrType() {
-	// TODO Auto-generated destructor stub
+
 }
 bool MyUsrType::onLoginCheckMsg(khala::InfoNodePtr& infoNodePtr,
 		Json::Value& msg, khala::Timestamp time) {

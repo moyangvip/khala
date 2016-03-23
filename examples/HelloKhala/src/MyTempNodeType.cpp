@@ -8,12 +8,12 @@
 #include "MyTempNodeType.h"
 #include "MyParseKey.h"
 MyTempNodeType::MyTempNodeType() {
-	// TODO Auto-generated constructor stub
+
 
 }
 
 MyTempNodeType::~MyTempNodeType() {
-	// TODO Auto-generated destructor stub
+
 }
 bool MyTempNodeType::onDevTypeMsg(khala::InfoNodePtr& infoNodePtr,
 		Json::Value& msg, khala::Timestamp time) {

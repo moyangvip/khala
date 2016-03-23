@@ -8,12 +8,12 @@
 #include "MyNodeType.h"
 #include "MyParseKey.h"
 MyNodeType::MyNodeType() {
-	// TODO Auto-generated constructor stub
+
 
 }
 
 MyNodeType::~MyNodeType() {
-	// TODO Auto-generated destructor stub
+
 }
 bool MyNodeType::onMyEventMsg(khala::InfoNodePtr& infoNodePtr,
 		Json::Value& msg, khala::Timestamp time) {

@@ -11,12 +11,12 @@
 #include <khala/NodeManager.h>
 //#include"DAO/UsrInfoDao.h"
 ChatType::ChatType() {
-	// TODO Auto-generated constructor stub
+
 
 }
 
 ChatType::~ChatType() {
-	// TODO Auto-generated destructor stub
+
 }
 bool ChatType::onLoginCheckMsg(khala::InfoNodePtr& infoNodePtr,
 		Json::Value& msg, khala::Timestamp time) {
