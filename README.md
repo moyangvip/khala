@@ -13,7 +13,6 @@ moyangvip@163.com
 1、从github库下载源码https://github.com/moyangvip/khala
 
 
-
 2、Khala采用CMake为build system，安装方法：
 
 　$sudo apt-get install cmake
@@ -22,7 +21,7 @@ moyangvip@163.com
 
 3、Khala依赖于Boost，Boost安装方式：
 
-$ sudo apt-get install libboost-dev libboost-test-dev
+  $ sudo apt-get install libboost-dev libboost-test-dev
 
 
 
@@ -34,7 +33,7 @@ $ sudo apt-get install libboost-dev libboost-test-dev
 
 在Khala根目录输入：
 
-$ ./build.sh
+  $ ./build.sh
 
 此时将以默认的Debug模式("-O0")编译khala库和它自带的例子，生成的静态库文件位于./build/Debug/lib/目录，生成的可执行文件位于./build/Debug/bin/目录。
 
@@ -42,12 +41,12 @@ $ ./build.sh
 
 如果要编译release版，则可以输入：
 
-$ BUILD_TYPE=release ./build.sh
+  $ BUILD_TYPE=release ./build.sh
 
 此时将以Release模式("-O2 -finline-limit=1000 -DNDEBUG") 编译khala库和它自带的例子，生成的静态库文件位于./build/release/lib/目录，生成的可执行文件位于./build/release/bin/目录。
 
 
 如果只想编译khala库，而不编译例子，则输入：
 
-$ BUILD_NO_EXAMPLES=1 ./build.sh
+  $ BUILD_NO_EXAMPLES=1 ./build.sh
 此时将只编译khala库，生成的静态库文件位于./build/{Debug,release}/lib/目录。
