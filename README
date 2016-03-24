@@ -8,31 +8,63 @@ http://www.cnblogs.com/moyangvip/p/5049673.html
 moyangvip@163.com
 
 
-安装：
-1、从github库下载源码https://github.com/moyangvip/khala
+一、安装：
 
+1、从github库下载源码https://github.com/moyangvip/khala
 
 2、Khala采用CMake为build system，安装方法：
 　$sudo apt-get install cmake
 
-
 3、Khala依赖于Boost，Boost安装方式：
-  $ sudo apt-get install libboost-dev libboost-test-dev
-
+　$ sudo apt-get install libboost-dev libboost-test-dev
 
 4、Khala同时依赖于muduo（https://github.com/chenshuo/muduo）
-和json（jsoncpp-src-0.5.0），示例工程中/khala/examples/HelloKhala/libs/目录中已经包含其静态库。
+和json（jsoncpp-src-0.5.0），在khala/Khala/libs/目录中已经包含其静态库。
 
-
-5、编译方法：
+5、编译安装方法：
 在Khala根目录输入：
-  $ ./build.sh
-此时将以默认的Debug模式("-O0")编译khala库和它自带的例子，生成的静态库文件位于./build/Debug/lib/目录，生成的可执行文件位于./build/Debug/bin/目录。
+　$ ./build.sh
+  此时将以默认的Debug模式("-O0")编译khala库和它自带的例子，生成的静态库文件(libKhala.a)位于./build/Debug/libs/目录，生成的例子的可执行文件位于./build/Debug/bin/目录。
 
 如果要编译release版，则可以输入：
   $ BUILD_TYPE=release ./build.sh
-此时将以Release模式("-O2 -finline-limit=1000 -DNDEBUG") 编译khala库和它自带的例子，生成的静态库文件位于./build/release/lib/目录，生成的可执行文件位于./build/release/bin/目录。
+  此时将以Release模式("-O2 -finline-limit=1000 -DNDEBUG") 编译khala库和它自带的例子，生成的静态库文件(libKhala.a)位于./build/release/libs/目录，生成的例子的可执行文件位于./build/release/bin/目录。
 
 如果只想编译khala库，而不编译例子，则输入：
   $ BUILD_NO_EXAMPLES=1 ./build.sh
-此时将只编译khala库，生成的静态库文件位于./build/{Debug,release}/lib/目录。
+  此时将只编译khala库，生成的静态库文件(libKhala.a)位于./build/Debug/lib/目录。
+
+
+二、目录结构：
+
+1、Khala的目录结构如下：
+
+khala
+|-- License
+|-- README
+|-- build.sh (安装脚本)
+|
+|-- Khala (khala框架的主体)
+| |-- include (编译khala依赖的头文件：khala本身头文件和muduo、json的头文件)
+| |-- src (代码实现)
+| |-- libs (依赖的静态库muduo和json)
+|
+|-- examples 
+| |-- HelloKhala (khala的示例)
+| | |-- src (示例代码)
+| |
+| |-- testClient (客户端测试示例)
+
+
+2、通过./build.sh编译安装后，生成的build目录结构如下：
+
+build
+|-- {Debug or Release }
+| | -- bin (生成的可执行文件)
+| | -- libs (生成的Khala静态库，以及muduo和json的静态库)
+| | -- include (静态库的头文件)
+
+
+三、使用
+　　在新建的项目中如果希望使用khala库，只需要执行build.sh编译安装后，导入相应的头文件路径( ./build/{Debug or Release }/include/ )，和库文件路径( ./build/{Debug or Release }/libs/ )，并且链接相应的静态库文件 ( -lKhala -lmduo_net -lmuduo_base -ljson -lphread )即可。
+

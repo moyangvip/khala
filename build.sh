@@ -15,19 +15,10 @@ mkdir -p $BUILD_DIR/$BUILD_TYPE \
            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
            -DCMAKE_BUILD_NO_EXAMPLES=$BUILD_NO_EXAMPLES \
            $SOURCE_DIR \
-  && make $*
-if [ $? -eq 0 ] && [ -e ./lib/libKhala.a ];then
-  if [ $BUILD_NO_EXAMPLES -eq 0 ];then  
-    if [ -L $SOURCE_DIR/examples/HelloKhala/libs/libKhala.a ] \
-  	|| [ -e $SOURCE_DIR/examples/HelloKhala/libs/libKhala.a ];then
-      rm -f $SOURCE_DIR/examples/HelloKhala/libs/libKhala.a
-    fi
-    ln -s ./lib/libKhala.a $SOURCE_DIR/examples/HelloKhala/libs/
-    if [ $? -eq 0 ];then
-      echo "Build success!"
-    fi
-  else
-    echo "Build success!"
-  fi
+  && make $* 
+if [ $? -eq 0 ] && [ -e ./libs/libKhala.a ];then
+  cp -rf $SOURCE_DIR/Khala/include/ ./include/
+  cp -rf $SOURCE_DIR/Khala/libs/ ./
+  echo "Build success!"
 fi
 

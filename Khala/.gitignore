@@ -29,3 +29,5 @@
 
 Debug/
 Release/
+.cproject
+.project
