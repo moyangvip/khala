@@ -29,5 +29,5 @@
 
 Debug/
 Release/
-include/
-libs/libKhala.a
+.cproject
+.project

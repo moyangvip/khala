@@ -24,6 +24,8 @@ private:
 	typedef boost::unordered_set<uint> IDSet;
 	mutable muduo::MutexLock mutex_;
 	IDSet idSet_;
+	uint currMaxID;
+	static const uint MAX_ID;
 	static RandomOnlyID randomOnlyID_;
 };
 }

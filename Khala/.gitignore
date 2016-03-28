@@ -31,3 +31,4 @@ Debug/
 Release/
 .cproject
 .project
+libs/libKhala.a

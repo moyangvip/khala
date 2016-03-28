@@ -48,7 +48,7 @@ public:
 	 * infoNode.setExtraContext(ptr);
 	 */
 	void setExtraContext(const boost::any& context);
-
+	//this is thread unsafe
 	const boost::any& getExtraContext() const;
 private:
 	void setTempId(uint id);

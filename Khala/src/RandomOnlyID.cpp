@@ -6,23 +6,24 @@
  */
 
 #include <khala/RandomOnlyID.h>
-#include <ctime>
-#include <cstdlib>
+#include <muduo/base/Logging.h>
 using namespace khala;
-#define Random() (rand()%((uint) 0-1))
-RandomOnlyID RandomOnlyID::randomOnlyID_;
 
+RandomOnlyID RandomOnlyID::randomOnlyID_;
+const uint RandomOnlyID::MAX_ID = 0 - 1;
 uint RandomOnlyID::getOnlyID() {
-	srand(time(0));
+	muduo::MutexLockGuard lock(mutex_);
 	while (true) {
-		uint newId = Random();
-		{
-			muduo::MutexLockGuard lock(mutex_);
-			typename IDSet::iterator it = idSet_.find(newId);
-			if (it == idSet_.end()) {
-				idSet_.insert(newId);
-				return newId;
-			}
+		if (currMaxID == MAX_ID) {
+			LOG_WARN<<"currMaxID is MAX_ID:"<<MAX_ID;
+			currMaxID = 0;
+		} else {
+			++currMaxID;
+		}
+		typename IDSet::iterator it = idSet_.find(currMaxID);
+		if (it == idSet_.end()) {
+			idSet_.insert(currMaxID);
+			return currMaxID;
 		}
 	}
 }
@@ -33,7 +34,8 @@ void RandomOnlyID::releaseID(uint id) {
 		idSet_.erase(it);
 	}
 }
-RandomOnlyID::RandomOnlyID() {
+RandomOnlyID::RandomOnlyID() :
+		currMaxID(0) {
 	idSet_.insert(DEFAULT_ID);
 }
 RandomOnlyID& RandomOnlyID::getInstance() {
