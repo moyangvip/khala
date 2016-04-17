@@ -95,8 +95,15 @@ void MsgController::onConnection(const TcpConnectionPtr& conn, Timestamp time) {
 	InfoNodePtr infoNodePtr(new InfoNode(conn));
 	if (nodeServer_->getTempNodePool()->setNewNode(infoNodePtr->getTempId(),
 			infoNodePtr)) {
+		/*
 		LOG_INFO << conn->peerAddress().toIpPort() << " tmp ID:"
-				<< infoNodePtr->getTempId() << " create!";
+				<< infoNodePtr->getTempId() << " create!";*/
+		ObjectType* objectType = 0;
+		this->getObjectType(TEMP_NODE_TYPE, &objectType);
+		TempNodeType* nodeType = dynamic_cast<TempNodeType*>(objectType);
+		if(nodeType){
+			nodeType->onCreate(infoNodePtr,time);
+		}
 	}
 }
 void MsgController::onDisConnection(const TcpConnectionPtr& conn,

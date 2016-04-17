@@ -37,6 +37,10 @@ bool NodeType::onNodeIdMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 	infoNodePtr->send(sendStr);
 	return true;
 }
+bool NodeType::onHeartMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
+		Timestamp time) {
+	return true;
+}
 NodeType::NodeType() {
 }
 NodeType::~NodeType() {
@@ -121,6 +125,8 @@ void NodeType::setRegisterMsg(RegisterHandler& handler) {
 			boost::bind(&NodeType::onLogoutMsg_, this, _1, _2, _3));
 	handler.setRegisterMsg(NODE_ID_TYPE,
 			boost::bind(&NodeType::onNodeIdMsg, this, _1, _2, _3));
+	handler.setRegisterMsg(HEART_TYPE,
+			boost::bind(&NodeType::onHeartMsg, this, _1, _2, _3));
 }
 /*
  * you must set a unique string type as the NodeType's key!
@@ -129,3 +135,4 @@ const std::string& NodeType::getObjectTypeName() {
 	static std::string typeStr(LOGIN_NODE_TYPE);
 	return typeStr;
 }
+

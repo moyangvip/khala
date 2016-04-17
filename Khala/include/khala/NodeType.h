@@ -62,6 +62,11 @@ public:
 	 */
 	virtual const std::string& getObjectTypeName();
 	/*
+	 * how to process heart msg,you can override it
+	 * */
+	virtual bool onHeartMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
+				Timestamp time);
+	/*
 	 * you can get node id,you can override it
 	 * */
 	virtual bool onNodeIdMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,

@@ -26,7 +26,7 @@ namespace khala {
 #define OVER_TIME "overTime"
 #define ERR_RUN "errRun"
 #define ERR_TYPE "errType"
-
+#define HEART_TYPE "heartType"
 
 //this is my msg type
 

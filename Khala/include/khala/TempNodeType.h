@@ -20,13 +20,22 @@ public:
 	 * you can use like NodeType
 	 * */
 	static TempNodeType* getInstance();
-
 	virtual const std::string& getObjectTypeName();
 	virtual void setRegisterMsg(RegisterHandler& handler);
+	/*
+	 * when a connect is start,wil invoke it,you can override it
+	 * */
+	virtual void onCreate(InfoNodePtr& infoNodePtr, Timestamp time);
 	/*
 	 * you can get node type,you can override it
 	 * */
 	virtual bool onDevTypeMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
+			Timestamp time);
+
+	/*
+	 * how to process heart msg,you can override it
+	 * */
+	virtual bool onHeartMsg(InfoNodePtr& infoNodePtr, Json::Value& msg,
 			Timestamp time);
 	/*
 	 * you can get login status,you can override it
@@ -36,7 +45,7 @@ public:
 private:
 	bool onLoginMsg_(InfoNodePtr& infoNodePtr, Json::Value& msg,
 			Timestamp time);
-	void onLoginTypeCheck(InfoNodePtr& infoNodePtr, Json::Value& msg);
+	ObjectType* onLoginTypeCheck(InfoNodePtr& infoNodePtr, Json::Value& msg);
 };
 }
 

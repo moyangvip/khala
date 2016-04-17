@@ -84,7 +84,7 @@ bool NodePool::setNewNode(uint id, InfoNodePtr& infoNodePtr) {
 		if (nodeCache_.find(type) == nodeCache_.end()) {
 			NewIDMapPtr newIDMapPtr(new NewIDMap);
 			nodeCache_[type] = newIDMapPtr;
-			LOG_INFO << "add new  type node Pool:" << type << " Type!";
+			//LOG_INFO << "add new  type node Pool:" << type << " Type!";
 		}
 		(*(nodeCache_[type]))[id] = infoNodePtr;
 	} //this is end of nodeMapLock_
@@ -111,7 +111,7 @@ bool NodePool::remove(uint id, const std::string& type) {
 				//if the NewIDMapPtr is empty,delete it
 				//be careful we will delete the iterator,we will break the loop,so it is safe
 				nodeCache_.erase(it1);
-				LOG_INFO << type << " node Pool is empty! is deleted!";
+				//LOG_INFO << type << " node Pool is empty! is deleted!";
 			}
 		}
 	}//this is end of nodeMapLock_
@@ -146,7 +146,7 @@ bool NodePool::remove(uint id) {
 					//if the NewIDMapPtr is empty,delete it
 					//be careful we will delete the iterator,we will break the loop,so it is safe
 					nodeCache_.erase(it1);
-					LOG_INFO << type << " node Pool is empty! is deleted!";
+					//LOG_INFO << type << " node Pool is empty! is deleted!";
 				}
 				//we have delete,break the loop
 				break;
